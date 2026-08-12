@@ -2,1650 +2,577 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TAP</title>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-5LSVCBME4B"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-5LSVCBME4B');
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TAP — Tecnici certificati vicino a te</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{margin:0;padding:0;box-sizing:border-box}
 :root{
   --orange:#f26522;--orange-dark:#c93a00;
-  --bg:#0d0d0d;--bg2:#141414;--bg3:#1c1c1e;--bg4:#242426;
-  --text:#fff;--muted:rgba(255,255,255,0.45);--dim:rgba(255,255,255,0.2);
-  --border:rgba(255,255,255,0.08);--green:#4ade80;--blue:#60a5fa;--red:#f87171;--yellow:#fbbf24;
+  --bg:#0d0d0d;--bg2:#141414;--bg3:#1c1c1e;
+  --text:#fff;--muted:rgba(255,255,255,0.5);--dim:rgba(255,255,255,0.2);
+  --border:rgba(255,255,255,0.08);
 }
-html,body{width:100%;height:100%;background:#000;font-family:'Nunito',sans-serif;color:var(--text);overflow:hidden}
-.shell{width:100vw;height:100vh;position:fixed;inset:0;margin:0;border-radius:0;border:none;box-shadow:none;overflow:hidden;background:var(--bg)}
-.notch{display:none}
-.home-bar{display:none}
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s ease;overflow:hidden}
-.screen.active{opacity:1;pointer-events:all}
-.scroll-screen{justify-content:flex-start;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
-.screen::before{content:'';position:absolute;top:5%;left:50%;transform:translateX(-50%);width:380px;height:380px;background:radial-gradient(circle,rgba(242,101,34,0.1) 0%,transparent 65%);pointer-events:none;z-index:0;animation:breathe 5s ease-in-out infinite}
-@keyframes breathe{0%,100%{opacity:.6;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.1)}}
-@keyframes riseIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;overflow-x:hidden}
 
-/* LOGO */
-.tap-logo{display:flex;align-items:baseline;line-height:1}
-.tap-logo .T{font-family:'Bebas Neue',sans-serif;font-size:82px;font-weight:400;color:#fff;line-height:1}
-.tap-logo .ap{font-family:'Bebas Neue',sans-serif;font-size:82px;font-weight:400;color:var(--orange);line-height:1}
-
-/* ONBOARDING */
-.onb-screen{position:absolute;inset:0;background:var(--bg);z-index:400;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;transition:opacity .4s}
-.onb-dots{display:flex;gap:8px;margin-bottom:40px}
-.onb-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .3s}
-.onb-dot.active{background:var(--orange);width:24px;border-radius:4px}
-.onb-emoji{font-size:64px;margin-bottom:24px;animation:riseIn .5s ease both}
-.onb-title{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;text-align:center;margin-bottom:12px;animation:riseIn .5s .1s ease both}
-.onb-desc{font-size:15px;color:var(--muted);text-align:center;line-height:1.7;max-width:280px;animation:riseIn .5s .2s ease both}
-
-/* BUTTONS */
-.btn{width:300px;height:56px;border:none;border-radius:32px;font-family:'Nunito',sans-serif;font-size:17px;font-weight:800;cursor:pointer;transition:transform .13s,box-shadow .13s;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn:active{transform:scale(0.96)}
-.btn-primary{background:linear-gradient(135deg,#f26522,#cc3d00);color:#fff;box-shadow:0 8px 28px rgba(220,65,0,0.45);margin-bottom:14px}
-.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
-.btn-sm{height:40px;border-radius:13px;font-size:13px;font-weight:800;border:none;cursor:pointer;padding:0 16px;transition:all .15s;font-family:'Nunito',sans-serif}
-.btn-sm:active{transform:scale(0.95)}
-.btn-green{background:rgba(74,222,128,0.18);color:var(--green)}
-.btn-red{background:rgba(248,113,113,0.18);color:var(--red)}
-.btn-blue{background:rgba(96,165,250,0.18);color:var(--blue)}
-.btn-orange{background:linear-gradient(135deg,#f26522,#cc3d00);color:#fff;box-shadow:0 4px 14px rgba(220,65,0,0.3)}
-.btn-yellow{background:rgba(251,191,36,0.18);color:var(--yellow)}
-.link-btn{background:none;border:none;color:var(--muted);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:4px;cursor:pointer;margin-top:10px}
-
-/* FORMS */
-.form-wrap{width:100%;padding:50px 20px 40px;z-index:1}
-.form-header{display:flex;align-items:center;gap:12px;margin-bottom:22px}
-.back-btn{width:38px;height:38px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;transition:background .2s}
-.form-header h2{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px}
-.badge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:.5px;margin-left:auto}
-.badge-c{background:rgba(59,130,246,0.2);color:var(--blue)}
-.badge-i{background:rgba(242,101,34,0.2);color:var(--orange)}
-.badge-wait{background:rgba(251,191,36,0.2);color:var(--yellow)}
-.badge-ok{background:rgba(74,222,128,0.2);color:var(--green)}
-.badge-no{background:rgba(248,113,113,0.2);color:var(--red)}
-.badge-ver{background:rgba(74,222,128,0.2);color:var(--green);font-size:10px}
-
-.field{margin-bottom:13px}
-.field label{display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
-.field input,.field select,.field textarea{width:100%;padding:0 14px;background:var(--bg3);border:1px solid var(--border);border-radius:13px;color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none;transition:border-color .2s;-webkit-appearance:none}
-.field input{height:48px}
-.field select{height:48px}
-.field textarea{height:80px;padding:12px 14px;resize:none;line-height:1.5}
-.field input::placeholder,.field textarea::placeholder{color:var(--dim);font-weight:400}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(242,101,34,0.1)}
-.field select option{background:#1c1c1e}
-
-.spec-wrap{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
-.spec-tag{padding:7px 12px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;user-select:none}
-.spec-tag.sel{background:rgba(242,101,34,0.18);border-color:var(--orange);color:var(--orange)}
-
-.price-section h4{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px}
-.price-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.price-row label{font-size:12px;font-weight:700;flex:1}
-.price-inputs{display:flex;align-items:center;gap:5px;flex-shrink:0}
-.price-input{width:62px;height:36px;padding:0 8px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;outline:none;text-align:center}
-.price-input:focus{border-color:var(--orange)}
-
-.divider{display:flex;align-items:center;gap:12px;margin:16px 0}
-.divider span{color:var(--dim);font-size:12px;white-space:nowrap}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
-
-/* TOP NAV */
-.top-nav{width:100%;padding:44px 18px 12px;z-index:1;flex-shrink:0}
-.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.nav-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px}
-.nav-sub{font-size:12px;color:var(--muted)}
-.logout-btn{background:none;border:1px solid var(--border);border-radius:10px;padding:5px 12px;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
-
-/* AVATAR */
-.big-avatar{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;flex-shrink:0;margin-bottom:12px}
-.small-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0}
-
-/* TAB BAR */
-.tab-bar{position:absolute;bottom:0;left:0;right:0;height:76px;background:rgba(13,13,13,0.96);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:150;padding-bottom:6px}
-.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding-top:8px}
-.tab-icon{font-size:20px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.4)}
-.tab-label{font-size:10px;font-weight:700;color:var(--muted)}
-.tab-item.active .tab-label{color:var(--orange)}
-.tab-item.active .tab-icon{color:var(--orange)}
-.notif-dot{width:8px;height:8px;background:var(--red);border-radius:50%;position:absolute;top:6px;right:22px}
-
-/* CATEGORIES */
-.categories-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;padding:0 18px 90px;width:100%;z-index:1;max-width:900px;margin:0 auto}
-@media(min-width:768px){
-  .categories-grid{grid-template-columns:repeat(4,1fr);padding:0 40px 100px}
-  .top-nav{padding:44px 40px 16px}
-  .inst-list{padding:0 40px 100px}
-  .form-wrap{max-width:600px;margin:0 auto;padding:50px 40px 40px}
-  .chat-wrap{max-width:900px;margin:0 auto;width:100%}
-  .chat-input-wrap{max-width:900px;margin:0 auto}
-  .info-card{max-width:800px;width:calc(100% - 80px);margin:0 auto 12px}
-  .toggle-card{max-width:800px;width:calc(100% - 80px);margin:0 auto 12px}
-  .prices-card{max-width:800px;width:calc(100% - 80px);margin:0 auto 12px}
-  .search-wrap{max-width:900px;margin:0 auto}
-  .tab-bar{max-width:600px;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:20px 60px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(13,13,13,0.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
 }
-.cat-card{background:var(--bg3);border:1px solid var(--border);border-radius:18px;padding:18px 14px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:8px}
-.cat-card:active{transform:scale(0.96)}
-.cat-emoji{font-size:28px}
-.cat-name{font-size:13px;font-weight:800}
-.cat-desc{font-size:11px;color:var(--muted)}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px}
+.nav-logo span{color:var(--orange)}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:700;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{
+  padding:10px 24px;
+  background:linear-gradient(135deg,var(--orange),var(--orange-dark));
+  color:#fff;border:none;border-radius:24px;
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;
+  cursor:pointer;transition:transform .15s,box-shadow .15s;
+  text-decoration:none;
+  box-shadow:0 4px 14px rgba(220,65,0,0.4);
+}
+.nav-cta:hover{transform:scale(1.05);box-shadow:0 6px 20px rgba(220,65,0,0.55)}
 
-/* INSTALLER CARDS */
-.inst-list{padding:0 18px 90px;width:100%;z-index:1}
-.inst-card{background:var(--bg3);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:10px}
-.inst-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-.inst-name{font-size:15px;font-weight:800;margin-bottom:2px}
-.inst-zone{font-size:12px;color:var(--muted)}
-.tags-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
-.tag{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
-.tag-orange{background:rgba(242,101,34,0.15);color:var(--orange)}
-.tag-green{background:rgba(74,222,128,0.15);color:var(--green)}
-.rating-row{display:flex;align-items:center;gap:6px;margin-bottom:10px}
-.rating-num{font-size:13px;font-weight:800;color:var(--yellow)}
-.rating-count{font-size:11px;color:var(--muted)}
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:120px 60px 80px;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);
+  width:900px;height:900px;
+  background:radial-gradient(circle,rgba(242,101,34,0.12) 0%,transparent 65%);
+  pointer-events:none;animation:breathe 6s ease-in-out infinite;
+}
+@keyframes breathe{
+  0%,100%{transform:translateX(-50%) scale(1);opacity:.7}
+  50%{transform:translateX(-50%) scale(1.1);opacity:1}
+}
+.hero-inner{
+  max-width:1200px;width:100%;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;
+  position:relative;z-index:1;
+}
+.hero-left{animation:slideRight .8s cubic-bezier(.22,1,.36,1) both}
+@keyframes slideRight{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:translateX(0)}}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 16px;border-radius:20px;
+  background:rgba(242,101,34,0.15);border:1px solid rgba(242,101,34,0.3);
+  font-size:12px;font-weight:800;color:var(--orange);letter-spacing:.8px;
+  text-transform:uppercase;margin-bottom:24px;
+}
+.hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(56px,7vw,96px);
+  letter-spacing:3px;line-height:.95;
+  margin-bottom:24px;
+}
+.hero-title span{color:var(--orange)}
+.hero-desc{
+  font-size:18px;color:var(--muted);line-height:1.7;
+  max-width:480px;margin-bottom:40px;font-weight:600;
+}
+.hero-btns{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.btn-hero{
+  padding:16px 36px;border-radius:32px;
+  font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;
+  cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;
+}
+.btn-primary-hero{
+  background:linear-gradient(135deg,var(--orange),var(--orange-dark));
+  color:#fff;border:none;
+  box-shadow:0 8px 28px rgba(220,65,0,0.45);
+}
+.btn-primary-hero:hover{transform:scale(1.04);box-shadow:0 12px 36px rgba(220,65,0,0.6)}
+.btn-secondary-hero{
+  background:transparent;color:var(--text);
+  border:1px solid var(--border);
+}
+.btn-secondary-hero:hover{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.05)}
 
-/* PRENOTAZIONI */
-.pren-card{background:var(--bg3);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:10px}
-.pren-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.pren-name{font-size:14px;font-weight:800}
-.pren-info{font-size:12px;color:var(--muted);margin-bottom:4px}
-.pren-date{font-size:13px;font-weight:700;color:var(--orange);margin-bottom:6px}
-.pren-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:8px}
-.pren-actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--border)}
-.tel-reveal{background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.25);border-radius:11px;padding:10px 12px;margin-bottom:8px;font-size:13px;font-weight:700;color:var(--green)}
+.hero-stats{display:flex;gap:40px;margin-top:48px}
+.stat{border-left:2px solid var(--orange);padding-left:16px}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--text);line-height:1}
+.stat-label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
 
-/* STARS */
-.stars-row{display:flex;gap:6px;justify-content:center;margin:14px 0}
-.star{font-size:34px;cursor:pointer;transition:transform .15s;filter:grayscale(1);opacity:.35}
-.star.on{filter:none;opacity:1}
-.star:hover{transform:scale(1.15)}
-.rec-card{background:var(--bg4);border-radius:12px;padding:12px;margin-bottom:8px}
-.rec-stars{font-size:13px;color:var(--yellow);margin-bottom:4px}
-.rec-text{font-size:13px;color:var(--muted);line-height:1.5}
-.rec-author{font-size:11px;color:var(--dim);margin-top:4px;font-weight:700}
+/* Phone mockup */
+.hero-right{display:flex;justify-content:center;align-items:center;animation:slideLeft .8s .2s cubic-bezier(.22,1,.36,1) both}
+@keyframes slideLeft{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+.phone-mock{
+  width:280px;height:580px;
+  background:var(--bg2);
+  border-radius:40px;
+  border:8px solid #2a2a2a;
+  box-shadow:
+    0 0 0 1px #333,
+    0 40px 80px rgba(0,0,0,0.8),
+    0 0 60px rgba(242,101,34,0.15);
+  overflow:hidden;position:relative;
+  animation:float 4s ease-in-out infinite;
+}
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-12px)}
+}
+.phone-notch{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:88px;height:24px;background:#1c1c1e;
+  border-radius:0 0 14px 14px;z-index:10;
+}
+.phone-screen{
+  width:100%;height:100%;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.phone-screen::before{
+  content:'';position:absolute;top:5%;left:50%;transform:translateX(-50%);
+  width:260px;height:260px;
+  background:radial-gradient(circle,rgba(242,101,34,0.18) 0%,transparent 65%);
+  pointer-events:none;
+}
+.phone-logo{font-family:'Bebas Neue',sans-serif;font-size:64px;line-height:1;margin-bottom:10px;z-index:1}
+.phone-logo span{color:var(--orange)}
+.phone-tag{font-size:11px;color:var(--muted);text-align:center;line-height:1.6;max-width:180px;margin-bottom:28px;z-index:1;font-weight:600}
+.phone-cats{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:220px;z-index:1;margin-bottom:20px}
+.phone-cat{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:12px;padding:10px;
+  font-size:10px;font-weight:800;
+}
+.phone-cat-emoji{font-size:18px;margin-bottom:4px}
+.phone-btn{
+  width:180px;height:38px;
+  background:linear-gradient(135deg,var(--orange),var(--orange-dark));
+  border:none;border-radius:20px;color:#fff;
+  font-size:12px;font-weight:800;z-index:1;cursor:pointer;
+}
 
-/* CHAT */
-.chat-wrap{width:100%;flex:1;overflow-y:auto;padding:8px 14px;display:flex;flex-direction:column;gap:10px;z-index:1;-webkit-overflow-scrolling:touch;min-height:0}
-.chat-msg{max-width:82%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.5;font-weight:600;word-break:break-word}
-.msg-me{align-self:flex-end;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;border-bottom-right-radius:4px}
-.msg-other{align-self:flex-start;background:var(--bg3);border:1px solid var(--border);border-bottom-left-radius:4px}
-.msg-ai{align-self:flex-start;background:var(--bg3);border:1px solid var(--border);border-bottom-left-radius:4px}
-.msg-user{align-self:flex-end;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;border-bottom-right-radius:4px}
-.typing-dots{display:flex;gap:4px;align-items:center;padding:2px 0}
-.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:dot 1.2s ease-in-out infinite}
-.typing-dots span:nth-child(2){animation-delay:.2s}
-.typing-dots span:nth-child(3){animation-delay:.4s}
-@keyframes dot{0%,80%,100%{transform:scale(0.7);opacity:.5}40%{transform:scale(1);opacity:1}}
-.chat-input-wrap{width:100%;padding:10px 14px 86px;background:var(--bg);border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;position:relative;z-index:1}
-.chat-input{flex:1;height:44px;padding:0 14px;background:var(--bg3);border:1px solid var(--border);border-radius:22px;color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;outline:none}
-.chat-input:focus{border-color:var(--orange)}
-.chat-input::placeholder{color:var(--dim);font-weight:400}
-.send-btn{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;box-shadow:0 4px 12px rgba(220,65,0,0.3)}
+/* ── HOW IT WORKS ── */
+.section{padding:100px 60px;max-width:1200px;margin:0 auto}
+.section-label{
+  font-size:12px;font-weight:800;color:var(--orange);
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;
+}
+.section-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(36px,5vw,64px);letter-spacing:2px;
+  margin-bottom:16px;line-height:1;
+}
+.section-sub{font-size:16px;color:var(--muted);max-width:500px;line-height:1.7;font-weight:600}
 
-/* PROFILE CARDS */
-.info-card{width:calc(100% - 36px);margin:0 18px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:18px;padding:16px;z-index:1;flex-shrink:0}
-.info-card h3{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}
-.info-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.info-row:last-child{margin-bottom:0}
-.info-label{font-size:12px;color:var(--muted)}
-.info-val{font-size:13px;font-weight:800}
-.toggle-card{width:calc(100% - 36px);margin:0 18px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:14px;z-index:1;flex-shrink:0}
-.toggle-info{flex:1}
-.toggle-info h4{font-size:14px;font-weight:800;margin-bottom:2px}
-.toggle-info p{font-size:11px;color:var(--muted)}
-.toggle{width:50px;height:28px;background:var(--bg2);border-radius:14px;border:1px solid var(--border);cursor:pointer;position:relative;transition:background .3s;flex-shrink:0}
-.toggle.on{background:linear-gradient(135deg,var(--orange),var(--orange-dark));border-color:var(--orange)}
-.toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .3s;box-shadow:0 2px 4px rgba(0,0,0,0.3)}
-.toggle.on::after{transform:translateX(22px)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:60px}
+.step{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:24px;padding:32px;
+  position:relative;overflow:hidden;
+  transition:border-color .2s,transform .2s;
+}
+.step:hover{border-color:rgba(242,101,34,0.4);transform:translateY(-4px)}
+.step::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--orange),var(--orange-dark));
+}
+.step-num{
+  font-family:'Bebas Neue',sans-serif;font-size:48px;
+  color:rgba(242,101,34,0.2);line-height:1;margin-bottom:16px;
+}
+.step-icon{
+  width:48px;height:48px;border-radius:14px;
+  background:rgba(242,101,34,0.12);border:1px solid rgba(242,101,34,0.2);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:20px;
+}
+.step-title{font-size:20px;font-weight:800;margin-bottom:10px}
+.step-desc{font-size:14px;color:var(--muted);line-height:1.7;font-weight:600}
 
-/* OVERLAY */
-.overlay{position:absolute;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .3s}
-.overlay.show{opacity:1;pointer-events:all}
-.sheet{width:100%;background:var(--bg2);border-radius:24px 24px 0 0;padding:24px 20px 44px;border-top:1px solid var(--border);transform:translateY(100%);transition:transform .35s cubic-bezier(.22,1,.36,1);max-height:90%;overflow-y:auto}
-.overlay.show .sheet{transform:translateY(0)}
-.sheet-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:18px}
+/* ── FEATURES ── */
+.features-wrap{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.features-inner{padding:100px 60px;max-width:1200px;margin:0 auto}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:60px}
+.feat-card{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:20px;padding:28px;
+  transition:border-color .2s,transform .2s;
+}
+.feat-card:hover{border-color:rgba(242,101,34,0.35);transform:translateY(-3px)}
+.feat-icon{
+  width:44px;height:44px;border-radius:14px;
+  background:rgba(242,101,34,0.12);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:18px;
+}
+.feat-title{font-size:17px;font-weight:800;margin-bottom:8px}
+.feat-desc{font-size:13px;color:var(--muted);line-height:1.7;font-weight:600}
 
-/* SEARCH */
-.search-wrap{position:relative;padding:0 18px 12px;width:100%;z-index:1;flex-shrink:0}
-.search-input{width:100%;height:44px;padding:0 14px 0 40px;background:var(--bg3);border:1px solid var(--border);border-radius:13px;color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none}
-.search-input:focus{border-color:var(--orange)}
-.search-input::placeholder{color:var(--dim);font-weight:400}
-.search-wrap::before{content:'🔍';position:absolute;left:30px;top:50%;transform:translateY(-60%);font-size:14px;pointer-events:none}
+/* ── FOR INSTALLERS ── */
+.installer-section{
+  padding:100px 60px;max-width:1200px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;
+}
+.installer-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:24px;padding:32px;
+}
+.installer-card h3{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px}
+.inst-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+.inst-row:last-child{border-bottom:none}
+.inst-label{font-size:13px;color:var(--muted);font-weight:600}
+.inst-val{font-size:13px;font-weight:800}
+.inst-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.inst-tag{padding:4px 10px;border-radius:20px;background:rgba(242,101,34,0.15);color:var(--orange);font-size:11px;font-weight:700}
+.inst-tag-green{background:rgba(74,222,128,0.15);color:#4ade80}
+.stars{color:#fbbf24;font-size:14px}
 
-/* TOAST */
-.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:1px solid var(--border);padding:11px 18px;border-radius:13px;font-size:13px;font-weight:700;z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;max-width:320px;text-align:center;pointer-events:none}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.err{border-color:rgba(239,68,68,0.5);color:var(--red)}
-.toast.ok{border-color:rgba(34,197,94,0.4);color:var(--green)}
+.benefits{display:flex;flex-direction:column;gap:16px;margin-top:32px}
+.benefit{display:flex;align-items:flex-start;gap:16px}
+.benefit-icon{
+  width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  background:rgba(242,101,34,0.12);border:1px solid rgba(242,101,34,0.2);
+  display:flex;align-items:center;justify-content:center;
+}
+.benefit-text h4{font-size:15px;font-weight:800;margin-bottom:4px}
+.benefit-text p{font-size:13px;color:var(--muted);line-height:1.6;font-weight:600}
 
-/* LOADING */
-#loading{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500}
-.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* ── CTA SECTION ── */
+.cta-section{
+  margin:0 60px 100px;
+  background:linear-gradient(135deg,rgba(242,101,34,0.15),rgba(204,61,0,0.08));
+  border:1px solid rgba(242,101,34,0.25);
+  border-radius:32px;padding:80px 60px;
+  text-align:center;position:relative;overflow:hidden;
+}
+.cta-section::before{
+  content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);
+  width:600px;height:400px;
+  background:radial-gradient(circle,rgba(242,101,34,0.1) 0%,transparent 65%);
+}
+.cta-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,5vw,72px);letter-spacing:3px;margin-bottom:16px;position:relative;z-index:1}
+.cta-desc{font-size:18px;color:var(--muted);margin-bottom:40px;position:relative;z-index:1;font-weight:600}
+.cta-btns{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;position:relative;z-index:1}
 
-.page-header{width:100%;padding:44px 18px 12px;display:flex;align-items:center;gap:12px;z-index:1;flex-shrink:0}
-.page-header h2{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px}
-.empty{text-align:center;padding:50px 20px;color:var(--muted)}
-.empty .e-icon{font-size:40px;margin-bottom:12px}
-.empty p{font-size:13px;line-height:1.6}
-.section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:0 18px;margin-bottom:8px;z-index:1;flex-shrink:0;width:100%}
+/* ── FOOTER ── */
+footer{
+  background:var(--bg2);border-top:1px solid var(--border);
+  padding:48px 60px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:24px;
+}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:32px}
+.footer-logo span{color:var(--orange)}
+.footer-links{display:flex;gap:24px}
+.footer-links a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;transition:color .2s}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{color:var(--dim);font-size:12px;font-weight:600}
 
-@media(max-width:430px){
-  body{background:var(--bg)}
-  .shell{width:100vw;height:100vh;border-radius:0;border:none;box-shadow:none}
-  .notch{display:none}
+/* ── MOBILE ── */
+@media(max-width:900px){
+  nav{padding:16px 24px}
+  .nav-links{display:none}
+  .hero{padding:100px 24px 60px}
+  .hero-inner{grid-template-columns:1fr;gap:40px}
+  .hero-right{display:none}
+  .section{padding:60px 24px}
+  .steps{grid-template-columns:1fr}
+  .features-inner{padding:60px 24px}
+  .features-grid{grid-template-columns:1fr}
+  .installer-section{grid-template-columns:1fr;padding:60px 24px;gap:40px}
+  .cta-section{margin:0 24px 60px;padding:48px 24px}
+  footer{padding:32px 24px;flex-direction:column;align-items:flex-start}
+}
+
+/* ── APP REDIRECT ── */
+@media(max-width:480px){
+  .hero-right{display:none}
+  .hero-stats{gap:20px}
+  nav{padding:16px 20px}
+  .nav-links{display:none}
+  .hero{padding:90px 20px 60px}
+  .section{padding:60px 20px}
+  .steps{grid-template-columns:1fr}
+  .features-inner{padding:60px 20px}
+  .features-grid{grid-template-columns:1fr}
+  .installer-section{grid-template-columns:1fr;padding:60px 20px;gap:40px}
+  .cta-section{margin:0 20px 60px;padding:48px 20px}
+  footer{padding:32px 20px;flex-direction:column;align-items:flex-start}
 }
 </style>
 </head>
 <body>
-<div class="shell">
-  <div class="notch"></div>
 
-  <!-- LOADING -->
-  <div id="loading"><div class="spinner"></div><div style="color:var(--muted);font-size:13px">Caricamento...</div></div>
-
-  <!-- ══ ONBOARDING ══ -->
-  <div class="onb-screen" id="onboarding">
-    <div class="onb-dots">
-      <div class="onb-dot active" id="dot0"></div>
-      <div class="onb-dot" id="dot1"></div>
-      <div class="onb-dot" id="dot2"></div>
-    </div>
-    <div class="onb-emoji" id="onb-emoji">🔥</div>
-    <div class="onb-title" id="onb-title">Benvenuto su TAP</div>
-    <div class="onb-desc" id="onb-desc">Trova tecnici certificati vicino a te, disponibili anche nelle emergenze.</div>
-    <div style="position:absolute;bottom:60px;width:100%;padding:0 32px;display:flex;flex-direction:column;align-items:center;gap:12px">
-      <button class="btn btn-primary" id="onb-btn" onclick="nextOnb()">Avanti →</button>
-      <button class="link-btn" onclick="skipOnb()">Salta</button>
-    </div>
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">T<span>ap</span></div>
+  <div class="nav-links">
+    <a href="#come-funziona">Come funziona</a>
+    <a href="#installatori">Installatori</a>
+    <a href="#contatti">Contatti</a>
   </div>
+  <a href="/app/index.html" class="nav-cta">Apri l'app</a>
+</nav>
 
-  <!-- ══ HOME ══ -->
-  <div class="screen" id="s-home">
-    <div style="display:flex;flex-direction:column;align-items:center;z-index:1;animation:riseIn .8s cubic-bezier(.22,1,.36,1) both">
-      <div class="tap-logo" style="margin-bottom:14px"><span class="T">T</span><span class="ap">ap</span></div>
-      <p style="color:var(--muted);font-size:15px;text-align:center;line-height:1.65;max-width:230px;margin-bottom:40px">Tecnici certificati vicino a te,<br>anche nelle emergenze</p>
-
-      <!-- COME FUNZIONA -->
-      <div style="width:300px;margin-bottom:44px;display:flex;flex-direction:column;gap:20px;z-index:1">
-        <div style="display:flex;align-items:center;gap:16px">
-          <div style="width:44px;height:44px;border-radius:14px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-badge">
+        <span>Nuovo</span> Tecnici certificati vicino a te
+      </div>
+      <h1 class="hero-title">
+        Trova il<br>tecnico<br><span>giusto.</span><br>Subito.
+      </h1>
+      <p class="hero-desc">
+        TAP mette in contatto clienti e installatori termoidraulici certificati. Caldaie, bagni, impianti, emergenze — tutto in un tap.
+      </p>
+      <div class="hero-btns">
+        <a href="/app/index.html" class="btn-hero btn-primary-hero">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+          Inizia ora
+        </a>
+        <a href="#come-funziona" class="btn-hero btn-secondary-hero">
+          Scopri di più →
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">Certificati</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">24h</div>
+          <div class="stat-label">Emergenze</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">0€</div>
+          <div class="stat-label">Per iniziare</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="phone-mock">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-logo">T<span>ap</span></div>
+          <div class="phone-tag">Tecnici certificati vicino a te, anche nelle emergenze</div>
+          <div class="phone-cats">
+            <div class="phone-cat"><div class="phone-cat-emoji">🔥</div>Caldaie</div>
+            <div class="phone-cat"><div class="phone-cat-emoji">💧</div>Idraulica</div>
+            <div class="phone-cat"><div class="phone-cat-emoji">🚿</div>Bagni</div>
+            <div class="phone-cat"><div class="phone-cat-emoji">🚨</div>Emergenze</div>
           </div>
-          <div><div style="font-size:14px;font-weight:800;margin-bottom:2px">Cerca il tecnico</div><div style="font-size:12px;color:var(--muted);line-height:1.4">Trova installatori certificati nella tua zona</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:16px">
-          <div style="width:44px;height:44px;border-radius:14px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </div>
-          <div><div style="font-size:14px;font-weight:800;margin-bottom:2px">Prenota con un tap</div><div style="font-size:12px;color:var(--muted);line-height:1.4">Scegli data e ora, descrivi il problema</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:16px">
-          <div style="width:44px;height:44px;border-radius:14px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </div>
-          <div><div style="font-size:14px;font-weight:800;margin-bottom:2px">Leggi le recensioni</div><div style="font-size:12px;color:var(--muted);line-height:1.4">Valutazioni reali da clienti verificati</div></div>
+          <button class="phone-btn">Inizia ora</button>
         </div>
       </div>
-
-      <button class="btn btn-primary" onclick="go('s-role')">Inizia ora</button>
-      <button class="link-btn" onclick="go('s-login')">Ho già un account</button>
     </div>
   </div>
+</section>
 
-  <!-- ══ SCELTA RUOLO ══ -->
-  <div class="screen" id="s-role">
-    <div style="z-index:1;display:flex;flex-direction:column;align-items:center;padding:0 24px">
-      <div class="tap-logo" style="margin-bottom:6px"><span class="T">T</span><span class="ap">ap</span></div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:32px">Chi sei?</p>
-      <div onclick="go('s-reg-c')" style="width:300px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:20px;display:flex;gap:16px;align-items:center;margin-bottom:12px;cursor:pointer" onmouseover="this.style.borderColor='rgba(242,101,34,0.5)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="width:48px;height:48px;border-radius:14px;background:rgba(242,101,34,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+<!-- COME FUNZIONA -->
+<div id="come-funziona" style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="section">
+    <div class="section-label">Come funziona</div>
+    <h2 class="section-title">Semplice come<br>un <span style="color:var(--orange)">tap.</span></h2>
+    <p class="section-sub">Tre passi per trovare il tecnico giusto nella tua zona.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         </div>
-        <div><div style="font-size:16px;font-weight:800;margin-bottom:2px">Sono un Cliente</div><div style="font-size:12px;color:var(--muted);line-height:1.4">Cerco un tecnico per riparazioni o emergenze</div></div>
+        <div class="step-title">Cerca per categoria</div>
+        <div class="step-desc">Scegli il tipo di lavoro — caldaia, idraulica, bagno, emergenza. Vedi subito gli installatori disponibili nella tua zona.</div>
       </div>
-      <div onclick="go('s-reg-i')" style="width:300px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:20px;display:flex;gap:16px;align-items:center;cursor:pointer" onmouseover="this.style.borderColor='rgba(242,101,34,0.5)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="width:48px;height:48px;border-radius:14px;background:rgba(242,101,34,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         </div>
-        <div><div style="font-size:16px;font-weight:800;margin-bottom:2px">Sono un Installatore</div><div style="font-size:12px;color:var(--muted);line-height:1.4">Offro servizi idraulici, caldaie e impianti</div></div>
+        <div class="step-title">Prenota con un tap</div>
+        <div class="step-desc">Scegli data e ora, descrivi il problema, allega una foto. L'installatore riceve la richiesta e risponde subito.</div>
       </div>
-      <button class="link-btn" onclick="go('s-home')" style="margin-top:20px">← Indietro</button>
-    </div>
-  </div>
-
-  <!-- ══ REG CLIENTE ══ -->
-  <div class="screen scroll-screen" id="s-reg-c">
-    <div class="form-wrap">
-      <div class="form-header"><div class="back-btn" onclick="go('s-role')">←</div><h2>REGISTRATI</h2><span class="badge badge-c">CLIENTE</span></div>
-      <div class="field"><label>Nome</label><input id="c-nome" type="text" placeholder="Es. Francesco"></div>
-      <div class="field"><label>Cognome</label><input id="c-cognome" type="text" placeholder="Es. Rossi"></div>
-      <div class="field"><label>Età</label><input id="c-eta" type="number" placeholder="Es. 35" min="18" max="99"></div>
-      <div class="field"><label>Sesso</label><select id="c-sesso"><option value="">Seleziona...</option><option value="M">Uomo</option><option value="F">Donna</option><option value="A">Preferisco non dirlo</option></select></div>
-      <div class="field"><label>Città / Zona</label><input id="c-zona" type="text" placeholder="Es. Nettuno, Roma..."></div>
-      <div class="field"><label>Telefono</label><input id="c-tel" type="tel" placeholder="+39 333 1234567"></div>
-      <div class="field"><label>Email</label><input id="c-email" type="email" placeholder="la@tua.email"></div>
-      <div class="field"><label>Password</label><input id="c-pw" type="password" placeholder="Minimo 6 caratteri"></div>
-      <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="regCliente()">Crea account</button>
-      <div class="divider"><span>hai già un account?</span></div>
-      <button class="btn btn-secondary" style="width:100%" onclick="go('s-login')">Accedi</button>
-    </div>
-  </div>
-
-  <!-- ══ REG INSTALLATORE ══ -->
-  <div class="screen scroll-screen" id="s-reg-i">
-    <div class="form-wrap">
-      <div class="form-header"><div class="back-btn" onclick="go('s-role')">←</div><h2>REGISTRATI</h2><span class="badge badge-i">INSTALLATORE</span></div>
-      <div class="field"><label>Nome</label><input id="i-nome" type="text" placeholder="Es. Marco"></div>
-      <div class="field"><label>Cognome</label><input id="i-cognome" type="text" placeholder="Es. Bianchi"></div>
-      <div class="field"><label>Età</label><input id="i-eta" type="number" placeholder="Es. 40" min="18" max="99"></div>
-      <div class="field"><label>Sesso</label><select id="i-sesso"><option value="">Seleziona...</option><option value="M">Uomo</option><option value="F">Donna</option><option value="A">Preferisco non dirlo</option></select></div>
-      <div class="field"><label>Città / Zona</label><input id="i-zona" type="text" placeholder="Es. Nettuno, Anzio, Roma..."></div>
-      <div class="field"><label>Telefono</label><input id="i-tel" type="tel" placeholder="+39 333 1234567"></div>
-      <div class="field"><label>Partita IVA (opzionale)</label><input id="i-piva" type="text" placeholder="Es. 12345678901"></div>
-      <div class="field"><label>Anni di esperienza</label><input id="i-esp" type="number" placeholder="Es. 10" min="0" max="50"></div>
-      <div class="field">
-        <label>Specializzazioni</label>
-        <div class="spec-wrap" id="spec-wrap">
-          <div class="spec-tag" onclick="toggleSpec(this)" data-v="Caldaie">🔥 Caldaie</div>
-          <div class="spec-tag" onclick="toggleSpec(this)" data-v="Impianti idraulici">💧 Idraulica</div>
-          <div class="spec-tag" onclick="toggleSpec(this)" data-v="Bagni">🚿 Bagni</div>
-          <div class="spec-tag" onclick="toggleSpec(this)" data-v="Riscaldamento">🌡️ Riscaldamento</div>
-          <div class="spec-tag" onclick="toggleSpec(this)" data-v="Emergenze">🚨 Emergenze</div>
-          <div class="spec-tag" onclick="toggleSpec(this)" data-v="Climatizzazione">❄️ Clima</div>
-          <div class="spec-tag" onclick="toggleSpec(this)" data-v="Gas">⚡ Gas</div>
-          <div class="spec-tag" onclick="toggleSpec(this)" data-v="Pannelli solari">☀️ Solare</div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </div>
-      </div>
-      <div class="price-section" style="margin-bottom:14px">
-        <h4>Range prezzi per lavoro (€)</h4>
-        <div id="price-rows"></div>
-      </div>
-
-      <!-- CERTIFICAZIONI -->
-      <div style="margin-bottom:14px">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">Certificazioni (carica i documenti)</div>
-        <div style="background:rgba(242,101,34,0.08);border:1px solid rgba(242,101,34,0.2);border-radius:12px;padding:12px;margin-bottom:12px;font-size:12px;color:var(--muted);line-height:1.6">
-          Il tuo profilo sarà visibile ai clienti solo dopo la verifica dei documenti da parte di TAP. Carica PDF o foto delle tue certificazioni.
-        </div>
-        <div id="cert-list" style="display:flex;flex-direction:column;gap:8px"></div>
-        <button class="btn-sm btn-secondary" style="width:100%;margin-top:8px;border:1px solid var(--border)" onclick="addCertField()">+ Aggiungi certificazione</button>
-      </div>
-
-      <div class="field"><label>Email</label><input id="i-email" type="email" placeholder="la@tua.email"></div>
-      <div class="field"><label>Password</label><input id="i-pw" type="password" placeholder="Minimo 6 caratteri"></div>
-      <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="regInstallatore()">Crea account</button>
-      <div class="divider"><span>hai già un account?</span></div>
-      <button class="btn btn-secondary" style="width:100%" onclick="go('s-login')">Accedi</button>
-    </div>
-  </div>
-
-  <!-- ══ LOGIN ══ -->
-  <div class="screen scroll-screen" id="s-login">
-    <div class="form-wrap">
-      <div class="form-header"><div class="back-btn" onclick="go('s-home')">←</div><h2>ACCEDI</h2></div>
-      <div class="field"><label>Email</label><input id="l-email" type="email" placeholder="la@tua.email"></div>
-      <div class="field"><label>Password</label><input id="l-pw" type="password" placeholder="La tua password"></div>
-      <button class="btn btn-primary" style="width:100%;margin-top:20px" onclick="doLogin()">Entra</button>
-      <div class="divider"><span>password dimenticata?</span></div>
-      <button class="btn btn-secondary" style="width:100%" onclick="go('s-reset-pw')">Reset password</button>
-      <div class="divider"><span>non hai un account?</span></div>
-      <button class="btn btn-secondary" style="width:100%" onclick="go('s-role')">Registrati</button>
-    </div>
-  </div>
-
-  <!-- ══ RESET PASSWORD ══ -->
-  <div class="screen scroll-screen" id="s-reset-pw">
-    <div class="form-wrap">
-      <div class="form-header"><div class="back-btn" onclick="go('s-login')">←</div><h2>RESET PASSWORD</h2></div>
-      <p style="color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:24px">Inserisci la tua email. Ti manderemo un link per reimpostare la password.</p>
-      <div class="field"><label>Email</label><input id="rp-email" type="email" placeholder="la@tua.email"></div>
-      <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="resetPassword()">Invia link</button>
-    </div>
-  </div>
-
-  <!-- ══ DASH CLIENTE HOME ══ -->
-  <div class="screen scroll-screen" id="s-dash-c" style="justify-content:flex-start">
-    <div class="top-nav">
-      <div class="nav-row">
-        <div><div class="nav-sub">Ciao,</div><div class="nav-title" id="c-welcome">Cliente</div></div>
-        <button class="logout-btn" onclick="doLogout()">Esci</button>
-      </div>
-      <div style="font-size:13px;color:var(--muted)">Cosa ti serve oggi?</div>
-    </div>
-    <div class="categories-grid" id="cat-grid"></div>
-    <div class="tab-bar">
-      <div class="tab-item active" onclick="cTab(0)" id="tc0"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="tab-label">Home</div></div>
-      <div class="tab-item" onclick="cTab(1)" id="tc1"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="tab-label">Richieste</div></div>
-      <div class="tab-item" onclick="cTab(2)" id="tc2"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="tab-label">Profilo</div></div>
-      <div class="tab-item" onclick="cTab(3)" id="tc3"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 2v4"/><path d="M8 6h8"/><circle cx="8.5" cy="16" r="1"/><circle cx="15.5" cy="16" r="1"/><path d="M9 19h6"/></svg></div><div class="tab-label">AI</div></div>
-    </div>
-  </div>
-
-  <!-- ══ LISTA INSTALLATORI ══ -->
-  <div class="screen scroll-screen" id="s-inst-list" style="justify-content:flex-start">
-    <div class="page-header">
-      <div class="back-btn" onclick="go('s-dash-c')">←</div>
-      <h2 id="cat-title">Installatori</h2>
-    </div>
-    <div class="search-wrap">
-      <input class="search-input" type="text" placeholder="Cerca per nome o zona..." id="inst-search" oninput="filterInst()">
-    </div>
-    <div class="inst-list" id="inst-list-wrap"></div>
-  </div>
-
-  <!-- ══ PRENOTAZIONI CLIENTE ══ -->
-  <div class="screen scroll-screen" id="s-pren-c" style="justify-content:flex-start">
-    <div class="top-nav"><div class="nav-row"><div class="nav-title">Le mie richieste</div></div></div>
-    <div style="padding:0 18px 90px;width:100%;z-index:1" id="pren-c-list"></div>
-    <div class="tab-bar">
-      <div class="tab-item" onclick="cTab(0)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="tab-label">Home</div></div>
-      <div class="tab-item active" onclick="cTab(1)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="tab-label">Richieste</div></div>
-      <div class="tab-item" onclick="cTab(2)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="tab-label">Profilo</div></div>
-      <div class="tab-item" onclick="cTab(3)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 2v4"/><path d="M8 6h8"/><circle cx="8.5" cy="16" r="1"/><circle cx="15.5" cy="16" r="1"/><path d="M9 19h6"/></svg></div><div class="tab-label">AI</div></div>
-    </div>
-  </div>
-
-  <!-- ══ PROFILO CLIENTE ══ -->
-  <div class="screen scroll-screen" id="s-profilo-c" style="justify-content:flex-start">
-    <div class="top-nav"><div class="nav-row"><div class="nav-title">Il mio profilo</div><button class="logout-btn" onclick="doLogout()">Esci</button></div></div>
-    <div style="display:flex;flex-direction:column;align-items:center;z-index:1;margin-bottom:16px">
-      <div style="position:relative;margin-bottom:12px">
-        <div class="big-avatar" id="c-avatar" style="background:linear-gradient(135deg,var(--blue),#3b82f6);cursor:pointer" onclick="triggerFoto('c-foto-input')">?</div>
-        <div style="position:absolute;bottom:0;right:0;width:24px;height:24px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer" onclick="triggerFoto('c-foto-input')">📷</div>
-        <input type="file" id="c-foto-input" accept="image/*" style="display:none" onchange="onAvatarChange(event,'cliente')">
-      </div>
-      <div style="font-size:18px;font-weight:800" id="c-profilo-nome">—</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:2px" id="c-profilo-zona">—</div>
-    </div>
-    <div class="info-card">
-      <h3>Dati personali</h3>
-      <div class="info-row"><span class="info-label">Nome</span><span class="info-val" id="cp-nome">—</span></div>
-      <div class="info-row"><span class="info-label">Cognome</span><span class="info-val" id="cp-cognome">—</span></div>
-      <div class="info-row"><span class="info-label">Telefono</span><span class="info-val" id="cp-tel">—</span></div>
-      <div class="info-row"><span class="info-label">Email</span><span class="info-val" id="cp-email" style="font-size:12px">—</span></div>
-      <div class="info-row"><span class="info-label">Zona</span><span class="info-val" id="cp-zona">—</span></div>
-    </div>
-    <div style="padding:0 18px;width:100%;z-index:1;margin-bottom:90px">
-      <button class="btn btn-secondary" style="width:100%;margin-bottom:10px" onclick="openEdit('cliente')">Modifica profilo</button>
-    </div>
-    <div class="tab-bar">
-      <div class="tab-item" onclick="cTab(0)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="tab-label">Home</div></div>
-      <div class="tab-item" onclick="cTab(1)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="tab-label">Richieste</div></div>
-      <div class="tab-item active" onclick="cTab(2)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="tab-label">Profilo</div></div>
-      <div class="tab-item" onclick="cTab(3)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 2v4"/><path d="M8 6h8"/><circle cx="8.5" cy="16" r="1"/><circle cx="15.5" cy="16" r="1"/><path d="M9 19h6"/></svg></div><div class="tab-label">AI</div></div>
-    </div>
-  </div>
-
-  <!-- ══ AI CLIENTE ══ -->
-  <div class="screen" id="s-ai-c" style="justify-content:flex-start">
-    <div class="top-nav" style="padding-bottom:8px">
-      <div class="nav-row"><div><div class="nav-title" style="font-size:20px">🤖 Assistente TAP</div><div class="nav-sub">Fai domande tecniche</div></div></div>
-    </div>
-    <div class="chat-wrap" id="chat-c-msgs"></div>
-    <div class="chat-input-wrap">
-      <input class="chat-input" id="chat-c-input" placeholder="Es. la caldaia non si accende..." onkeydown="if(event.key==='Enter')sendAI('c')">
-      <button class="send-btn" onclick="sendAI('c')">➤</button>
-    </div>
-    <div style="height:10px;flex-shrink:0"></div>
-    <div class="tab-bar">
-      <div class="tab-item" onclick="cTab(0)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="tab-label">Home</div></div>
-      <div class="tab-item" onclick="cTab(1)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="tab-label">Richieste</div></div>
-      <div class="tab-item" onclick="cTab(2)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="tab-label">Profilo</div></div>
-      <div class="tab-item active" onclick="cTab(3)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 2v4"/><path d="M8 6h8"/><circle cx="8.5" cy="16" r="1"/><circle cx="15.5" cy="16" r="1"/><path d="M9 19h6"/></svg></div><div class="tab-label">AI</div></div>
-    </div>
-  </div>
-
-  <!-- ══ CHAT PRENOTAZIONE ══ -->
-  <div class="screen" id="s-chat" style="justify-content:flex-start">
-    <div class="page-header" style="padding-bottom:8px">
-      <div class="back-btn" id="chat-back">←</div>
-      <div><div style="font-size:15px;font-weight:800" id="chat-title">Chat</div><div style="font-size:11px;color:var(--muted)" id="chat-sub"></div></div>
-    </div>
-    <div class="chat-wrap" id="chat-msgs"></div>
-    <div class="chat-input-wrap">
-      <input class="chat-input" id="chat-msg-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendMsg()">
-      <button class="send-btn" onclick="sendMsg()">➤</button>
-    </div>
-    <div style="height:10px;flex-shrink:0"></div>
-  </div>
-
-  <!-- ══ DASH INSTALLATORE ══ -->
-  <div class="screen scroll-screen" id="s-dash-i" style="justify-content:flex-start">
-    <div class="top-nav">
-      <div class="nav-row">
-        <div style="display:flex;align-items:center;gap:12px">
-        <div style="position:relative">
-          <div class="small-avatar" id="i-avatar" style="background:linear-gradient(135deg,var(--orange),var(--orange-dark));cursor:pointer" onclick="triggerFoto('i-foto-input')">?</div>
-          <div style="position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;cursor:pointer" onclick="triggerFoto('i-foto-input')">📷</div>
-          <input type="file" id="i-foto-input" accept="image/*" style="display:none" onchange="onAvatarChange(event,'installatore')">
-        </div>
-          <div><div class="nav-sub">Il tuo profilo</div><div class="nav-title" id="i-welcome">Installatore</div></div>
-        </div>
-        <button class="logout-btn" onclick="doLogout()">Esci</button>
+        <div class="step-title">Lavoro fatto, recensisci</div>
+        <div class="step-desc">Dopo l'intervento lascia una recensione reale. Costruisci la reputazione dei tecnici migliori nella tua zona.</div>
       </div>
     </div>
-    <div class="toggle-card">
-      <div class="toggle-info"><h4 id="tog-txt">Disponibile</h4><p id="tog-sub">I clienti possono trovarti</p></div>
-      <div class="toggle on" id="avail-tog" onclick="toggleAvail()"></div>
-    </div>
-    <div class="info-card">
-      <h3>I tuoi dati</h3>
-      <div class="info-row"><span class="info-label">Zona</span><span class="info-val" id="p-zona">—</span></div>
-      <div class="info-row"><span class="info-label">Telefono</span><span class="info-val" id="p-tel">—</span></div>
-      <div class="info-row"><span class="info-label">Esperienza</span><span class="info-val" id="p-esp">—</span></div>
-      <div class="info-row"><span class="info-label">Partita IVA</span><span class="info-val" id="p-piva">—</span></div>
-      <div class="info-row"><span class="info-label">Lavori completati</span><span class="info-val" id="p-lavori">—</span></div>
-      <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:6px">
-        <span class="info-label">Specializzazioni</span>
-        <div style="display:flex;flex-wrap:wrap;gap:5px" id="p-specs"></div>
-      </div>
-    </div>
-    <div class="info-card">
-      <h3>I tuoi prezzi</h3>
-      <div id="p-prices"></div>
-    </div>
-    <div class="info-card">
-      <h3>⭐ Le tue recensioni</h3>
-      <div id="p-recensioni"><div style="color:var(--muted);font-size:13px">Nessuna recensione ancora</div></div>
-    </div>
-    <div style="padding:0 18px;width:100%;z-index:1;margin-bottom:10px">
-      <button class="btn btn-secondary" style="width:100%" onclick="openEdit('installatore')">Modifica profilo</button>
-    </div>
-    <div style="width:calc(100% - 36px);margin:0 18px 90px;background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:14px;font-size:12px;color:var(--muted);line-height:1.6;z-index:1">
-      📱 TAP è gratis. I clienti ti trovano e ti contattano tramite l'app.
-    </div>
-    <div class="tab-bar">
-      <div class="tab-item active" onclick="iTab(0)" id="ti0"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="tab-label">Profilo</div></div>
-      <div class="tab-item" onclick="iTab(1)" id="ti1"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="tab-label">Richieste</div></div>
-      <div class="tab-item" onclick="iTab(2)" id="ti2"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 2v4"/><path d="M8 6h8"/><circle cx="8.5" cy="16" r="1"/><circle cx="15.5" cy="16" r="1"/><path d="M9 19h6"/></svg></div><div class="tab-label">AI</div></div>
-    </div>
   </div>
-
-  <!-- ══ RICHIESTE INSTALLATORE ══ -->
-  <div class="screen scroll-screen" id="s-pren-i" style="justify-content:flex-start">
-    <div class="top-nav"><div class="nav-row"><div class="nav-title">Richieste lavori</div></div></div>
-    <div style="padding:0 18px 90px;width:100%;z-index:1" id="pren-i-list"></div>
-    <div class="tab-bar">
-      <div class="tab-item" onclick="iTab(0)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="tab-label">Profilo</div></div>
-      <div class="tab-item active" onclick="iTab(1)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="tab-label">Richieste</div></div>
-      <div class="tab-item" onclick="iTab(2)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 2v4"/><path d="M8 6h8"/><circle cx="8.5" cy="16" r="1"/><circle cx="15.5" cy="16" r="1"/><path d="M9 19h6"/></svg></div><div class="tab-label">AI</div></div>
-    </div>
-  </div>
-
-  <!-- ══ AI INSTALLATORE ══ -->
-  <div class="screen" id="s-ai-i" style="justify-content:flex-start">
-    <div class="top-nav" style="padding-bottom:8px">
-      <div class="nav-row"><div><div class="nav-title" style="font-size:20px">🤖 Assistente TAP</div><div class="nav-sub">Supporto tecnico professionale</div></div></div>
-    </div>
-    <div class="chat-wrap" id="chat-i-msgs"></div>
-    <div class="chat-input-wrap">
-      <input class="chat-input" id="chat-i-input" placeholder="Es. come sostituisco una valvola..." onkeydown="if(event.key==='Enter')sendAI('i')">
-      <button class="send-btn" onclick="sendAI('i')">➤</button>
-    </div>
-    <div style="height:10px;flex-shrink:0"></div>
-    <div class="tab-bar">
-      <div class="tab-item" onclick="iTab(0)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="tab-label">Profilo</div></div>
-      <div class="tab-item" onclick="iTab(1)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="tab-label">Richieste</div></div>
-      <div class="tab-item active" onclick="iTab(2)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 2v4"/><path d="M8 6h8"/><circle cx="8.5" cy="16" r="1"/><circle cx="15.5" cy="16" r="1"/><path d="M9 19h6"/></svg></div><div class="tab-label">AI</div></div>
-    </div>
-  </div>
-
-  <!-- ══ ADMIN PANEL ══ -->
-  <div class="screen scroll-screen" id="s-admin" style="justify-content:flex-start">
-    <div class="top-nav">
-      <div class="nav-row">
-        <div><div class="nav-title">Pannello Admin</div><div class="nav-sub">TAP — Verifica installatori</div></div>
-        <button class="logout-btn" onclick="go('s-dash-c')">← Esci</button>
-      </div>
-    </div>
-    <div style="padding:0 18px;width:100%;z-index:1;margin-bottom:8px">
-      <div style="display:flex;gap:8px;margin-bottom:16px">
-        <button class="btn-sm btn-orange" style="flex:1" onclick="loadAdmin('in_attesa')">In attesa</button>
-        <button class="btn-sm btn-secondary" style="flex:1;border:1px solid var(--border)" onclick="loadAdmin('approvata')">Approvati</button>
-        <button class="btn-sm btn-secondary" style="flex:1;border:1px solid var(--border)" onclick="loadAdmin('rifiutata')">Rifiutati</button>
-      </div>
-    </div>
-    <div style="padding:0 18px 90px;width:100%;z-index:1" id="admin-list"></div>
-  </div>
-
-  <!-- ══ OVERLAY BOOKING ══ -->
-  <div class="overlay" id="ov-booking" onclick="closeOv('ov-booking',event)">
-    <div class="sheet">
-      <div class="sheet-title">PRENOTA</div>
-      <div id="booking-inst-name" style="font-size:13px;font-weight:800;color:var(--orange);margin-bottom:16px"></div>
-      <div class="field"><label>Descrizione del problema</label><textarea id="b-desc" placeholder="Descrivi il problema o il lavoro da fare..."></textarea></div>
-      <div class="field">
-        <label>Foto del problema (opzionale)</label>
-        <div style="display:flex;align-items:center;gap:10px">
-          <button class="btn-sm btn-secondary" style="border:1px solid var(--border)" onclick="triggerFoto('b-foto-input')">📷 Allega foto</button>
-          <input type="file" id="b-foto-input" accept="image/*" style="display:none" onchange="onProblemFotoChange(event)">
-        </div>
-        <div id="b-foto-preview"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="field"><label>Data</label><input id="b-data" type="date"></div>
-        <div class="field"><label>Ora</label><input id="b-ora" type="time"></div>
-      </div>
-      <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="submitBooking()">Invia richiesta</button>
-    </div>
-  </div>
-
-  <!-- ══ OVERLAY RECENSIONE ══ -->
-  <div class="overlay" id="ov-review" onclick="closeOv('ov-review',event)">
-    <div class="sheet">
-      <div class="sheet-title">RECENSIONE</div>
-      <div id="rev-inst-name" style="font-size:13px;font-weight:800;color:var(--orange);margin-bottom:8px"></div>
-      <div style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:4px">Come è andato il lavoro?</div>
-      <div class="stars-row">
-        <span class="star" onclick="setStar(1)">⭐</span>
-        <span class="star" onclick="setStar(2)">⭐</span>
-        <span class="star" onclick="setStar(3)">⭐</span>
-        <span class="star" onclick="setStar(4)">⭐</span>
-        <span class="star" onclick="setStar(5)">⭐</span>
-      </div>
-      <div class="field"><label>Commento (opzionale)</label><textarea id="rev-commento" placeholder="Racconta la tua esperienza..."></textarea></div>
-      <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="submitRec()">Invia recensione</button>
-    </div>
-  </div>
-
-  <!-- ══ OVERLAY MODIFICA PROFILO ══ -->
-  <div class="overlay" id="ov-edit" onclick="closeOv('ov-edit',event)">
-    <div class="sheet">
-      <div class="sheet-title">MODIFICA PROFILO</div>
-      <div class="field"><label>Nome</label><input id="e-nome" type="text"></div>
-      <div class="field"><label>Cognome</label><input id="e-cognome" type="text"></div>
-      <div class="field"><label>Telefono</label><input id="e-tel" type="tel"></div>
-      <div class="field"><label>Città / Zona</label><input id="e-zona" type="text"></div>
-      <div id="e-inst-fields" style="display:none">
-        <div class="field"><label>Anni di esperienza</label><input id="e-esp" type="number" min="0" max="50"></div>
-        <div class="field"><label>Partita IVA</label><input id="e-piva" type="text"></div>
-      </div>
-      <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="saveEdit()">Salva modifiche</button>
-    </div>
-  </div>
-
-  <div class="home-bar"></div>
 </div>
-<div class="toast" id="toast"></div>
+
+<!-- FEATURES -->
+<div class="features-wrap">
+  <div class="features-inner">
+    <div class="section-label">Perché TAP</div>
+    <h2 class="section-title">Tutto quello che<br>ti <span style="color:var(--orange)">serve.</span></h2>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="feat-title">Tecnici verificati</div>
+        <div class="feat-desc">Ogni installatore viene verificato da TAP. Certificazioni reali, lavoro garantito. Mai più tecnici improvvisati.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="feat-title">Chat diretta</div>
+        <div class="feat-desc">Parla con il tecnico direttamente in app. Il numero di telefono appare solo dopo la conferma del lavoro.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="feat-title">Emergenze 24h</div>
+        <div class="feat-desc">La caldaia si è rotta alle 10 di sera? TAP ha installatori disponibili anche nei weekend e nelle emergenze.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="feat-title">Nella tua zona</div>
+        <div class="feat-desc">Vedi solo i tecnici disponibili nella tua città. Nessuno dall'altra parte d'Italia — solo professionisti vicini a te.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="feat-title">Recensioni reali</div>
+        <div class="feat-desc">Solo chi ha prenotato può lasciare una recensione. Nessuna recensione falsa — solo esperienze reali di clienti verificati.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 2v4"/><path d="M8 6h8"/><circle cx="8.5" cy="16" r="1"/><circle cx="15.5" cy="16" r="1"/></svg>
+        </div>
+        <div class="feat-title">Assistente AI</div>
+        <div class="feat-desc">Non sai cosa ha la caldaia? L'AI di TAP ti aiuta a capire il problema prima ancora di chiamare il tecnico.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PER INSTALLATORI -->
+<div id="installatori">
+  <div class="installer-section">
+    <div>
+      <div class="section-label">Per installatori</div>
+      <h2 class="section-title">Trova nuovi<br>clienti ogni<br><span style="color:var(--orange)">giorno.</span></h2>
+      <p class="section-sub" style="margin-bottom:32px">TAP è gratis per iniziare. Registrati, carica le tue certificazioni e i clienti nella tua zona ti trovano direttamente.</p>
+      <div class="benefits">
+        <div class="benefit">
+          <div class="benefit-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="benefit-text">
+            <h4>Profilo professionale verificato</h4>
+            <p>Le tue certificazioni visibili ai clienti. Niente più "ma sei certificato?"</p>
+          </div>
+        </div>
+        <div class="benefit">
+          <div class="benefit-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="benefit-text">
+            <h4>Reputazione che cresce</h4>
+            <p>Ogni lavoro ben fatto diventa una recensione. La tua storia parla per te.</p>
+          </div>
+        </div>
+        <div class="benefit">
+          <div class="benefit-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="benefit-text">
+            <h4>Zero costi. Zero vincoli. Solo nuovi clienti.</h4>
+            <p>Registrati e inizia subito a ricevere richieste nella tua zona.</p>
+          </div>
+        </div>
+      </div>
+      <a href="/app/index.html" class="btn-hero btn-primary-hero" style="margin-top:32px;display:inline-flex">
+        Inizia ora →
+      </a>
+    </div>
+    <div class="installer-card">
+      <h3>Esempio profilo installatore</h3>
+      <div class="inst-row">
+        <span class="inst-label">Nome</span>
+        <span class="inst-val">Marco Rossi</span>
+      </div>
+      <div class="inst-row">
+        <span class="inst-label">Zona</span>
+        <span class="inst-val">📍 Nettuno, Roma</span>
+      </div>
+      <div class="inst-row">
+        <span class="inst-label">Esperienza</span>
+        <span class="inst-val">12 anni</span>
+      </div>
+      <div class="inst-row">
+        <span class="inst-label">Valutazione</span>
+        <span class="inst-val"><span class="stars">⭐⭐⭐⭐⭐</span> 4.9</span>
+      </div>
+      <div class="inst-row">
+        <span class="inst-label">Lavori completati</span>
+        <span class="inst-val">47</span>
+      </div>
+      <div class="inst-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+        <span class="inst-label">Specializzazioni</span>
+        <div class="inst-tags">
+          <span class="inst-tag">Caldaie</span>
+          <span class="inst-tag">Gas</span>
+          <span class="inst-tag">Riscaldamento</span>
+          <span class="inst-tag">Emergenze</span>
+        </div>
+      </div>
+      <div class="inst-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+        <span class="inst-label">Certificazioni verificate</span>
+        <div class="inst-tags">
+          <span class="inst-tag inst-tag-green">✓ D.M. 37/2008</span>
+          <span class="inst-tag inst-tag-green">✓ F-Gas</span>
+          <span class="inst-tag inst-tag-green">✓ Gas/GPL</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section" id="contatti">
+  <h2 class="cta-title">Pronto a iniziare?</h2>
+  <p class="cta-desc">È gratis. Nessuna carta di credito. Nessun contratto.</p>
+  <div class="cta-btns">
+    <a href="/app/index.html" class="btn-hero btn-primary-hero">Sono un cliente →</a>
+    <a href="/app/index.html" class="btn-hero btn-secondary-hero">Sono un installatore →</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">T<span>ap</span></div>
+  <div class="footer-links">
+    <a href="/privacy.html">Privacy Policy</a>
+    <a href="/termini.html">Termini e Condizioni</a>
+    <a href="mailto:info@taptech.it">info@taptech.it</a>
+  </div>
+  <div class="footer-copy">© 2026 TAP — Tutti i diritti riservati</div>
+</footer>
 
 <script>
-const SURL='https://uwasrvzblizgncjhfcfh.supabase.co';
-const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3YXNydnpibGl6Z25jamhmY2ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMzU2NjgsImV4cCI6MjA5MzgxMTY2OH0.Npmrx9NX2MYWrfDcuPRJ7gfyr6t3kQSGRqSJfZ48P5A';
-const {createClient}=supabase;
-const db=createClient(SURL,SKEY);
-
-const CATS=[
-  {id:'caldaie',name:'Caldaie',emoji:'🔥',desc:'Installazione e riparazione',spec:'Caldaie'},
-  {id:'idraulica',name:'Idraulica',emoji:'💧',desc:'Perdite, tubi, rubinetti',spec:'Impianti idraulici'},
-  {id:'bagni',name:'Bagni',emoji:'🚿',desc:'Ristrutturazione e sanitari',spec:'Bagni'},
-  {id:'riscaldamento',name:'Riscaldamento',emoji:'🌡️',desc:'Termosifoni e pannelli',spec:'Riscaldamento'},
-  {id:'emergenze',name:'Emergenze',emoji:'🚨',desc:'Interventi urgenti 24h',spec:'Emergenze'},
-  {id:'clima',name:'Climatizzazione',emoji:'❄️',desc:'Condizionatori e pompe',spec:'Climatizzazione'},
-  {id:'gas',name:'Gas',emoji:'⚡',desc:'Impianti e riparazioni',spec:'Gas'},
-  {id:'solare',name:'Solare',emoji:'☀️',desc:'Pannelli e scalda acqua',spec:'Pannelli solari'},
-];
-
-const ONB=[
-  {emoji:'🔥',title:'Benvenuto su TAP',desc:'Trova tecnici certificati vicino a te, disponibili anche nelle emergenze.'},
-  {emoji:'🔧',title:'Come funziona',desc:'Scegli la categoria, guarda gli installatori disponibili nella tua zona e invia una richiesta.'},
-  {emoji:'⭐',title:'Fidati delle recensioni',desc:'Ogni installatore ha le recensioni dei clienti reali. Leggi, scegli e prenota in sicurezza.'},
-];
-
-let user=null,prof=null,allInst=[],curCat='',curCatSpec='',bookInst=null,curPrenId=null,isAvail=true,selStar=0,revData=null,editRuolo='',onbStep=0,chatInterval=null;
-
-// ── ONBOARDING ──
-function showOnb(){
-  const seen=localStorage.getItem('tap_onb_seen');
-  if(seen){document.getElementById('onboarding').style.display='none';return;}
-  onbStep=0; renderOnb();
-}
-function renderOnb(){
-  const o=ONB[onbStep];
-  document.getElementById('onb-emoji').textContent=o.emoji;
-  document.getElementById('onb-title').textContent=o.title;
-  document.getElementById('onb-desc').textContent=o.desc;
-  document.getElementById('onb-btn').textContent=onbStep<ONB.length-1?'Avanti →':'Inizia';
-  ONB.forEach((_,i)=>{
-    document.getElementById('dot'+i).className='onb-dot'+(i===onbStep?' active':'');
-  });
-}
-function nextOnb(){
-  if(onbStep<ONB.length-1){onbStep++;renderOnb();}
-  else skipOnb();
-}
-function skipOnb(){
-  localStorage.setItem('tap_onb_seen','1');
-  document.getElementById('onboarding').style.opacity='0';
-  setTimeout(()=>document.getElementById('onboarding').style.display='none',400);
-}
-
-// ── INIT ──
-// ── PERMESSI ──
-async function richiediPermessi(){
-  // Notifiche
-  if('Notification' in window && Notification.permission==='default'){
-    setTimeout(()=>Notification.requestPermission(),2000);
-  }
-}
-
-// ── FOTO PROFILO ──
-async function uploadFoto(file, userId){
-  if(!file) return null;
-  const ext=file.name.split('.').pop();
-  const path=`${userId}/avatar.${ext}`;
-  const {error}=await db.storage.from('tap-files').upload(path,file,{upsert:true});
-  if(error) return null;
-  const {data}=db.storage.from('tap-files').getPublicUrl(path);
-  return data.publicUrl;
-}
-
-async function uploadImmagine(file, userId, prenId){
-  if(!file) return null;
-  const ext=file.name.split('.').pop();
-  const path=`${userId}/problemi/${prenId||Date.now()}.${ext}`;
-  const {error}=await db.storage.from('tap-files').upload(path,file,{upsert:true});
-  if(error) return null;
-  const {data}=db.storage.from('tap-files').getPublicUrl(path);
-  return data.publicUrl;
-}
-
-function triggerFoto(inputId){document.getElementById(inputId)?.click();}
-
-async function onAvatarChange(e, ruolo){
-  const file=e.target.files?.[0]; if(!file||!user) return;
-  toast('Caricamento foto...');
-  const url=await uploadFoto(file,user.id);
-  if(!url) return toast('❌ Errore caricamento','error');
-  await db.from('profiles').update({avatar_url:url}).eq('id',user.id);
-  prof.avatar_url=url;
-  // aggiorna UI
-  if(ruolo==='installatore'){
-    const av=document.getElementById('i-avatar');
-    av.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-  } else {
-    const av=document.getElementById('c-avatar');
-    av.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-  }
-  toast('✅ Foto aggiornata','success');
-}
-
-async function onProblemFotoChange(e){
-  const file=e.target.files?.[0]; if(!file||!user) return;
-  toast('Caricamento immagine...');
-  const url=await uploadImmagine(file,user.id,null);
-  if(!url) return toast('❌ Errore','error');
-  // mostra anteprima nel form booking
-  const prev=document.getElementById('b-foto-preview');
-  if(prev){prev.innerHTML=`<img src="${url}" style="width:100%;border-radius:12px;margin-top:8px">`;prev.dataset.url=url;}
-  toast('✅ Foto allegata','success');
-}
-
-async function init(){
-  showOnb();
-  richiediPermessi();
-
-  // Gestisce il redirect dopo conferma email
-  const hashParams = new URLSearchParams(window.location.hash.replace('#',''));
-  const accessToken = hashParams.get('access_token');
-  if(accessToken){
-    // Supabase ha già settato la sessione dal redirect — aspetta un attimo
-    await new Promise(r=>setTimeout(r,500));
-  }
-
-  // Ascolta cambiamenti di sessione (incluso dopo conferma email)
-  db.auth.onAuthStateChange(async(event, session)=>{
-    if(event==='SIGNED_IN' && session && !user){
-      user=session.user;
-      await loadProf();
-    }
-  });
-
-  const {data:{session}}=await db.auth.getSession();
-  if(session){user=session.user;await loadProf();}
-  else{hide('loading');go('s-home');}
-  buildCatGrid(); buildPriceRows();
-  addMsg('chat-c-msgs','msg-ai','Ciao! 👋 Sono l\'assistente TAP. Fai pure domande tecniche sui tuoi impianti: caldaia, riscaldamento, idraulica... ti aiuto io!');
-  addMsg('chat-i-msgs','msg-ai','Ciao collega! 🔧 Sono qui per supportarti tecnicamente. Hai dubbi su un intervento? Chiedimi pure!');
-}
-
-async function loadProf(){
-  const {data, error}=await db.from('profiles').select('*').eq('id',user.id).single();
-  if(error || !data){
-    // Profilo non ancora creato (es. dopo conferma email) — aspetta e riprova
-    await new Promise(r=>setTimeout(r,1000));
-    const {data:data2}=await db.from('profiles').select('*').eq('id',user.id).single();
-    prof=data2;
-  } else {
-    prof=data;
-  }
-  hide('loading');
-  if(prof?.ruolo==='installatore') showInstDash();
-  else if(prof?.ruolo==='cliente') showClienteDash();
-  else if(prof?.email===ADMIN_EMAIL || user?.email===ADMIN_EMAIL){
-    // Admin senza ruolo — trattalo come cliente
-    if(!prof) prof={email:user.email,nome:'Admin',cognome:'',ruolo:'cliente'};
-    prof.ruolo='cliente';
-    showClienteDash();
-  } else if(prof && !prof.ruolo){
-    // Profilo esiste ma senza ruolo — chiedi di completare
-    go('s-home');
-    toast('Scegli se sei cliente o installatore','error');
-  } else {
-    go('s-home');
-  }
-}
-
-function hide(id){const el=document.getElementById(id);if(el)el.style.display='none';}
-function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');}
-function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(type==='error'?'err':type==='success'?'ok':'');setTimeout(()=>t.classList.remove('show'),3000);}
-function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1).toLowerCase():'';}
-function avatarColor(n){const c=['#f26522','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444'];return c[(n||'').charCodeAt(0)%c.length];}
-
-// ── OVERLAY ──
-function openOv(id){document.getElementById(id).classList.add('show');}
-function closeOv(id,e){if(e.target===document.getElementById(id))document.getElementById(id).classList.remove('show');}
-function closeOvDirect(id){document.getElementById(id).classList.remove('show');}
-
-// ── CATEGORIES ──
-function buildCatGrid(){
-  document.getElementById('cat-grid').innerHTML=CATS.map(c=>`
-    <div class="cat-card" onclick="openCat('${c.id}','${c.name}','${c.spec}')">
-      <div class="cat-emoji">${c.emoji}</div>
-      <div><div class="cat-name">${c.name}</div><div class="cat-desc">${c.desc}</div></div>
-    </div>`).join('');
-}
-
-async function openCat(id,name,spec){
-  curCat=id; curCatSpec=spec;
-  document.getElementById('cat-title').textContent=name;
-  go('s-inst-list');
-  const {data}=await db.from('profiles').select('*').eq('ruolo','installatore').eq('disponibile',true).eq('verificato',true);
-  allInst=(data||[]).filter(i=>(i.specializzazioni||[]).includes(spec));
-  renderInst(allInst);
-}
-
-function filterInst(){
-  const q=document.getElementById('inst-search').value.toLowerCase();
-  renderInst(q?allInst.filter(i=>(i.nome+' '+i.cognome+' '+(i.zona||'')).toLowerCase().includes(q)):allInst);
-}
-
-async function renderInst(list){
-  const el=document.getElementById('inst-list-wrap');
-  if(!list.length){el.innerHTML=`<div class="empty"><div class="e-icon">🔍</div><p>Nessun installatore disponibile<br>per questa categoria al momento.</p></div>`;return;}
-  const cards=await Promise.all(list.map(async i=>{
-    const ini=((i.nome||'?')[0]+(i.cognome||'?')[0]).toUpperCase();
-    const ac=avatarColor(i.nome);
-    const tags=(i.specializzazioni||[]).map(s=>`<span class="tag tag-orange">${s}</span>`).join('');
-    const pp=i.prezzi||{};
-    const priceStr=pp[curCat]?`<span class="tag tag-green">€${pp[curCat].min}–${pp[curCat].max}</span>`:'';
-    const rat=await getRating(i.id);
-    const {data:certs}=await db.from('certificazioni').select('tipo').eq('installatore_id',i.id).eq('stato','approvata');
-    const certTags=(certs||[]).slice(0,3).map(c=>`<span class="tag" style="background:rgba(74,222,128,0.12);color:var(--green);font-size:10px">✓ ${c.tipo.split('—')[0].trim()}</span>`).join('');
-    const verifBadge=i.verificato?`<span class="badge badge-ver" style="font-size:10px">✓ Verificato TAP</span>`:'';
-    return`<div class="inst-card">
-      <div class="inst-top">
-        <div class="small-avatar" style="background:linear-gradient(135deg,${ac},${ac}cc)">${ini}</div>
-        <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <div class="inst-name">${cap(i.nome)} ${cap(i.cognome)}</div>${verifBadge}
-          </div>
-          <div class="inst-zone">📍 ${i.zona||'—'}${i.esperienza?' · '+i.esperienza+' anni':''}</div>
-        </div>
-      </div>
-      ${rat?`<div class="rating-row"><span style="color:var(--yellow)">⭐</span><span class="rating-num">${rat.avg}</span><span class="rating-count">(${rat.count} recensioni)</span></div>`:''}
-      <div class="tags-row">${tags} ${priceStr}</div>
-      ${certTags?`<div class="tags-row" style="margin-top:4px">${certTags}</div>`:''}
-      <button class="btn-sm btn-orange" style="width:100%;margin-top:8px" onclick="openBooking('${i.id}','${cap(i.nome)} ${cap(i.cognome)}')">Richiedi intervento</button>
-    </div>`;
-  }));
-  el.innerHTML=cards.join('');
-}
-
-// ── CERTIFICAZIONI ──
-const CERT_TIPI = [
-  'Abilitazione D.M. 37/2008 — Lettera B (idrico-sanitari)',
-  'Abilitazione D.M. 37/2008 — Lettera C (riscaldamento/clima)',
-  'Abilitazione D.M. 37/2008 — Lettera E (impianti gas)',
-  'Patentino F-Gas (Reg. UE 517/2014)',
-  'Patentino Gas/GPL',
-  'Certificazione FER (Fonti Energetiche Rinnovabili)',
-  'Manutentore caldaie (DPR 74/2013)',
-  'Certificazione ISO 9001',
-  'Abilitazione pompe di calore',
-  'Certificazione fotovoltaico',
-  'Saldatura certificata',
-  'Altra certificazione',
-];
-
-let certFields = [];
-
-function addCertField(){
-  const id = Date.now();
-  certFields.push(id);
-  const el = document.getElementById('cert-list');
-  const div = document.createElement('div');
-  div.id = 'cert-'+id;
-  div.style.cssText = 'background:var(--bg3);border:1px solid var(--border);border-radius:13px;padding:12px;display:flex;flex-direction:column;gap:8px';
-  div.innerHTML = `
-    <select id="cert-tipo-${id}" style="width:100%;height:44px;padding:0 12px;background:var(--bg4);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:Nunito,sans-serif;font-size:13px;font-weight:600;outline:none;-webkit-appearance:none">
-      <option value="">Seleziona tipo certificazione...</option>
-      ${CERT_TIPI.map(t=>`<option value="${t}">${t}</option>`).join('')}
-    </select>
-    <div style="display:flex;align-items:center;gap:8px">
-      <label style="flex:1;background:var(--bg4);border:1px solid var(--border);border-radius:10px;height:44px;display:flex;align-items:center;padding:0 12px;cursor:pointer;font-size:13px;color:var(--muted);font-weight:600">
-        <input type="file" id="cert-file-${id}" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="onCertFileChange(event,${id})">
-        <span id="cert-file-label-${id}">Carica documento (PDF/foto)</span>
-      </label>
-      <button onclick="removeCert(${id})" style="width:36px;height:36px;background:rgba(248,113,113,0.15);border:none;border-radius:10px;color:var(--red);cursor:pointer;font-size:16px;flex-shrink:0">×</button>
-    </div>
-    <div id="cert-preview-${id}" style="font-size:12px;color:var(--green)"></div>
-  `;
-  el.appendChild(div);
-}
-
-function removeCert(id){
-  certFields = certFields.filter(f=>f!==id);
-  document.getElementById('cert-'+id)?.remove();
-}
-
-function onCertFileChange(e, id){
-  const file = e.target.files?.[0];
-  if(file) document.getElementById('cert-file-label-'+id).textContent = '✓ '+file.name;
-}
-
-async function uploadCertificazioni(userId){
-  const uploaded = [];
-  for(const id of certFields){
-    const tipo = document.getElementById('cert-tipo-'+id)?.value;
-    const file = document.getElementById('cert-file-'+id)?.files?.[0];
-    if(!tipo) continue;
-    let fileUrl = null;
-    if(file){
-      const ext = file.name.split('.').pop();
-      const path = `${userId}/certificazioni/${tipo.substring(0,30).replace(/\s/g,'_')}_${Date.now()}.${ext}`;
-      const {error} = await db.storage.from('tap-files').upload(path, file, {upsert:true});
-      if(!error){
-        const {data} = db.storage.from('tap-files').getPublicUrl(path);
-        fileUrl = data.publicUrl;
-      }
-    }
-    await db.from('certificazioni').insert({installatore_id:userId, tipo, file_url:fileUrl, stato:'in_attesa'});
-    uploaded.push(tipo);
-  }
-  if(uploaded.length){
-    await sendEmail(ADMIN_EMAIL,'📋 Nuova certificazione da verificare su TAP',
-      emailTemplate('Nuova certificazione caricata',
-        `<p>Un installatore ha caricato ${uploaded.length===1?'una nuova certificazione':'nuove certificazioni'} da verificare.</p>
-        <p><strong>Tipo:</strong> ${uploaded.join(', ')}</p>
-        <p>Accedi al pannello admin per controllare i documenti.</p>`,
-        'Vai al pannello Admin','https://taptech.it/app'));
-  }
-  return uploaded;
-}
-
-// ── ADMIN ──
-const ADMIN_EMAIL = 'info@taptech.it';
-
-async function sendEmail(to, subject, html){
-  try{
-    const res = await fetch('/.netlify/functions/send-email', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({to, subject, html})
-    });
-    if(!res.ok){
-      const err = await res.json().catch(()=>({}));
-      console.error('Invio email fallito:', err);
-      return false;
-    }
-    return true;
-  }catch(e){
-    console.error('Errore invio email:', e);
-    return false;
-  }
-}
-
-
-function emailTemplate(titolo, contenuto, btnTesto, btnLink){
-  return `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0d0d0d;color:#ffffff;border-radius:16px;overflow:hidden">
-    <div style="background:linear-gradient(135deg,#f26522,#c93a00);padding:32px;text-align:center">
-      <h1 style="font-size:42px;margin:0;letter-spacing:4px;color:#fff">TAP</h1>
-      <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px">Tecnici certificati vicino a te</p>
-    </div>
-    <div style="padding:32px">
-      <h2 style="font-size:20px;margin-bottom:16px">${titolo}</h2>
-      <div style="color:rgba(255,255,255,0.7);line-height:1.7;font-size:14px">${contenuto}</div>
-      ${btnTesto?`<div style="text-align:center;margin:28px 0"><a href="${btnLink||'https://taptech.it/app'}" style="background:linear-gradient(135deg,#f26522,#c93a00);color:#fff;padding:14px 36px;border-radius:28px;text-decoration:none;font-size:15px;font-weight:bold;display:inline-block">${btnTesto}</a></div>`:''}
-    </div>
-    <div style="background:#141414;padding:18px;text-align:center;color:rgba(255,255,255,0.3);font-size:11px">© 2026 TAP — taptech.it</div>
-  </div>`;
-}
-
-async function checkAdmin(){
-  if(prof?.email === ADMIN_EMAIL || user?.email === ADMIN_EMAIL){
-    const logoutBtn = document.querySelector('#s-dash-c .logout-btn');
-    if(logoutBtn && !document.getElementById('admin-btn')){
-      const btn = document.createElement('button');
-      btn.id = 'admin-btn';
-      btn.className = 'logout-btn';
-      btn.style.cssText = 'background:rgba(242,101,34,0.2);color:var(--orange);border-color:rgba(242,101,34,0.3);margin-right:8px';
-      btn.textContent = '⚙️';
-      btn.title = 'Pannello Admin';
-      btn.onclick = () => { go('s-admin'); loadAdmin('in_attesa'); };
-      logoutBtn.parentElement.insertBefore(btn, logoutBtn);
-    }
-  }
-}
-
-async function loadAdmin(stato){
-  const el = document.getElementById('admin-list');
-  el.innerHTML = '<div class="empty"><div class="spinner" style="margin:0 auto"></div></div>';
-  const {data} = await db.from('certificazioni')
-    .select('*, installatore:installatore_id(nome,cognome,email,zona,telefono,partita_iva,specializzazioni)')
-    .eq('stato', stato)
-    .order('created_at', {ascending:false});
-  if(!data?.length){
-    el.innerHTML = `<div class="empty"><div class="e-icon" style="font-size:32px;margin-bottom:8px">${stato==='in_attesa'?'⏳':stato==='approvata'?'✅':'❌'}</div><p>Nessuna certificazione ${stato==='in_attesa'?'in attesa':stato==='approvata'?'approvata':'rifiutata'}</p></div>`;
-    return;
-  }
-  el.innerHTML = data.map(c=>{
-    const inst = c.installatore;
-    const fileBtn = c.file_url ? `<a href="${c.file_url}" target="_blank" style="display:inline-block;padding:6px 12px;background:rgba(96,165,250,0.18);color:var(--blue);border-radius:10px;font-size:12px;font-weight:700;text-decoration:none">Vedi documento</a>` : '<span style="font-size:12px;color:var(--muted)">Nessun documento</span>';
-    const actions = stato==='in_attesa' ? `
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button class="btn-sm btn-green" style="flex:1" onclick="approvaDoc('${c.id}','${c.installatore_id}')">Approva</button>
-        <button class="btn-sm btn-red" style="flex:1" onclick="rifiutaDoc('${c.id}')">Rifiuta</button>
-      </div>` : '';
-    return `<div class="pren-card" style="margin-bottom:10px">
-      <div style="font-size:14px;font-weight:800;margin-bottom:4px">${cap(inst?.nome||'?')} ${cap(inst?.cognome||'?')}</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">📍 ${inst?.zona||'—'} · ${inst?.email||'—'}</div>
-      <div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:8px">${c.tipo}</div>
-      ${fileBtn}
-      ${actions}
-    </div>`;
-  }).join('');
-}
-
-async function approvaDoc(certId, instId){
-  await db.from('certificazioni').update({stato:'approvata'}).eq('id', certId);
-  // Controlla se tutte le cert sono approvate → verifica profilo
-  const {data} = await db.from('certificazioni').select('stato').eq('installatore_id', instId);
-  const tutteOk = data?.every(c=>c.stato==='approvata');
-  if(tutteOk) await db.from('profiles').update({verificato:true}).eq('id', instId);
-  toast('✅ Certificazione approvata','success');
-  loadAdmin('in_attesa');
-}
-
-async function rifiutaDoc(certId){
-  await db.from('certificazioni').update({stato:'rifiutata'}).eq('id', certId);
-  toast('❌ Certificazione rifiutata','error');
-  loadAdmin('in_attesa');
-}
-
-// ── BOOKING ──
-function openBooking(instId,instName){
-  bookInst={id:instId,name:instName};
-  document.getElementById('booking-inst-name').textContent='Per: '+instName;
-  document.getElementById('b-desc').value='';
-  document.getElementById('b-data').value='';
-  document.getElementById('b-ora').value='';
-  openOv('ov-booking');
-}
-
-async function submitBooking(){
-  const desc=document.getElementById('b-desc').value.trim();
-  const data=document.getElementById('b-data').value;
-  const ora=document.getElementById('b-ora').value;
-  if(!desc||!data||!ora) return toast('⚠️ Compila tutti i campi','error');
-  const fotoUrl=document.getElementById('b-foto-preview')?.dataset?.url||null;
-  const {error}=await db.from('prenotazioni').insert({cliente_id:user.id,installatore_id:bookInst.id,categoria:curCatSpec,descrizione:desc,data_lavoro:data,ora_lavoro:ora,stato:'in_attesa',foto_url:fotoUrl});
-  if(error) return toast('❌ '+error.message,'error');
-  // Email all'installatore
-  const {data:instProf}=await db.from('profiles').select('email,nome,cognome').eq('id',bookInst.id).single();
-  const {data:clProf}=await db.from('profiles').select('nome,cognome,zona').eq('id',user.id).single();
-  if(instProf?.email){
-    await sendEmail(instProf.email,'🔧 Nuova richiesta di intervento su TAP',
-      emailTemplate('Hai una nuova richiesta!',
-        `<p>Il cliente <strong>${cap(clProf?.nome||'')} ${cap(clProf?.cognome||'')}</strong> di <strong>${clProf?.zona||''}</strong> ha richiesto il tuo intervento.</p>
-        <p><strong>Categoria:</strong> ${curCatSpec}</p>
-        <p><strong>Data:</strong> ${data} alle ${ora}</p>
-        <p><strong>Descrizione:</strong> ${desc}</p>
-        <p>Accedi all'app per accettare o rifiutare la richiesta.</p>`,
-        'Apri TAP','https://taptech.it/app'));
-  }
-  // Email admin
-  await sendEmail(ADMIN_EMAIL,'📋 Nuova prenotazione su TAP',
-    emailTemplate('Nuova prenotazione',
-      `<p>Nuovo intervento richiesto su TAP.</p>
-      <p><strong>Cliente:</strong> ${cap(clProf?.nome||'')} ${cap(clProf?.cognome||'')}</p>
-      <p><strong>Installatore:</strong> ${cap(instProf?.nome||'')} ${cap(instProf?.cognome||'')}</p>
-      <p><strong>Categoria:</strong> ${curCatSpec}</p>
-      <p><strong>Data:</strong> ${data} alle ${ora}</p>`,
-      null,null));
-  closeOvDirect('ov-booking');
-  document.getElementById('b-foto-preview').innerHTML='';
-  delete document.getElementById('b-foto-preview').dataset.url;
-  toast('✅ Richiesta inviata','success');
-  setTimeout(()=>cTab(1),800);
-}
-
-// ── TABS CLIENTE ──
-function cTab(n){
-  for(let i=0;i<4;i++){const el=document.getElementById('tc'+i);if(el)el.classList.remove('active');}
-  if(n===0){go('s-dash-c');document.getElementById('tc0')?.classList.add('active');}
-  if(n===1){go('s-pren-c');loadPrenC();document.getElementById('tc1')?.classList.add('active');}
-  if(n===2){go('s-profilo-c');loadProfiloC();document.getElementById('tc2')?.classList.add('active');}
-  if(n===3){go('s-ai-c');document.getElementById('tc3')?.classList.add('active');}
-}
-
-// ── PRENOTAZIONI CLIENTE ──
-async function loadPrenC(){
-  const {data}=await db.from('prenotazioni').select('*,installatore:installatore_id(nome,cognome,telefono)').eq('cliente_id',user.id).order('created_at',{ascending:false});
-  const el=document.getElementById('pren-c-list');
-  if(!data?.length){el.innerHTML=`<div class="empty"><div class="e-icon">📋</div><p>Nessuna richiesta ancora.<br>Cerca un installatore e invia la tua prima richiesta!</p></div>`;return;}
-  el.innerHTML=data.map(p=>{
-    const stato=p.stato;
-    const bc=stato==='in_attesa'?'badge-wait':stato==='accettata'?'badge-ok':'badge-no';
-    const sl=stato==='in_attesa'?'⏳ In attesa':stato==='accettata'?'✅ Accettata':stato==='rifiutata'?'❌ Rifiutata':'✔️ Completata';
-    const inst=p.installatore;
-    const telDiv=stato==='accettata'&&inst?.telefono?`<div class="tel-reveal">📞 ${inst.telefono}</div>`:'';
-    const chatBtn=stato==='accettata'?`<button class="btn-sm btn-blue" onclick="openChat('${p.id}','${cap(inst?.nome||'')} ${cap(inst?.cognome||'')}','c')">Chat</button>`:'';
-    const recBtn=stato==='accettata'?`<button class="btn-sm btn-yellow" onclick="openRev('${p.id}','${p.installatore_id}','${cap(inst?.nome||'')} ${cap(inst?.cognome||'')}')">Recensisci</button>`:'';
-    const arrivoDiv=p.installatore_in_arrivo&&stato==='accettata'?`<div style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.35);border-radius:12px;padding:12px 14px;margin-bottom:8px;font-size:13px;font-weight:800;color:#fbbf24;display:flex;align-items:center;gap:8px"><span style="font-size:20px">🚗</span> Il tuo installatore sta arrivando!</div>`:'';
-    return`<div class="pren-card">
-      <div class="pren-header"><div class="pren-name">${cap(inst?.nome||'?')} ${cap(inst?.cognome||'?')}</div><span class="badge ${bc}">${sl}</span></div>
-      <div class="pren-info">📂 ${p.categoria}</div>
-      <div class="pren-date">📅 ${p.data_lavoro} alle ${(p.ora_lavoro||'').slice(0,5)}</div>
-      <div class="pren-desc">${p.descrizione}</div>
-      ${arrivoDiv}
-      ${telDiv}
-      ${chatBtn||recBtn?`<div class="pren-actions">${chatBtn}${recBtn}</div>`:''}
-    </div>`;
-  }).join('');
-}
-
-// ── PROFILO CLIENTE ──
-function loadProfiloC(){
-  if(!prof) return;
-  const nome=prof.nome||'';
-  const cognome=prof.cognome||'';
-  const ini=((nome||'?')[0]+(cognome||'?')[0]).toUpperCase();
-  const ac=avatarColor(nome);
-  const avEl=document.getElementById('c-avatar');
-  if(prof.avatar_url) avEl.innerHTML=`<img src="${prof.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-  else{avEl.textContent=ini;avEl.style.background=`linear-gradient(135deg,${ac},${ac}cc)`;}
-  document.getElementById('c-profilo-nome').textContent=(cap(nome)+' '+cap(cognome)).trim()||'—';
-  document.getElementById('c-profilo-zona').textContent=(prof.zona||'—');
-  document.getElementById('cp-nome').textContent=cap(prof.nome)||'—';
-  document.getElementById('cp-cognome').textContent=cap(prof.cognome)||'—';
-  document.getElementById('cp-tel').textContent=prof.telefono||'—';
-  document.getElementById('cp-email').textContent=prof.email||user?.email||'—';
-  document.getElementById('cp-zona').textContent=prof.zona||'—';
-}
-
-// ── TABS INSTALLATORE ──
-function iTab(n){
-  for(let i=0;i<3;i++){const el=document.getElementById('ti'+i);if(el)el.classList.remove('active');}
-  if(n===0){go('s-dash-i');document.getElementById('ti0')?.classList.add('active');}
-  if(n===1){go('s-pren-i');loadPrenI();document.getElementById('ti1')?.classList.add('active');}
-  if(n===2){go('s-ai-i');document.getElementById('ti2')?.classList.add('active');}
-}
-
-// ── PRENOTAZIONI INSTALLATORE ──
-async function loadPrenI(){
-  const {data}=await db.from('prenotazioni').select('*,cliente:cliente_id(nome,cognome,telefono,zona)').eq('installatore_id',user.id).order('created_at',{ascending:false});
-  const el=document.getElementById('pren-i-list');
-  if(!data?.length){el.innerHTML=`<div class="empty"><div class="e-icon">📋</div><p>Nessuna richiesta ancora.<br>Quando sei disponibile i clienti ti trovano!</p></div>`;return;}
-  el.innerHTML=data.map(p=>{
-    const stato=p.stato;
-    const bc=stato==='in_attesa'?'badge-wait':stato==='accettata'?'badge-ok':'badge-no';
-    const sl=stato==='in_attesa'?'⏳ In attesa':stato==='accettata'?'✅ Accettata':stato==='rifiutata'?'❌ Rifiutata':'✔️ Completata';
-    const cl=p.cliente;
-    const telDiv=stato==='accettata'&&cl?.telefono?`<div class="tel-reveal">📞 ${cl.telefono}</div>`:'';
-    const actions=stato==='in_attesa'
-      ?`<button class="btn-sm btn-green" onclick="rispondi('${p.id}','accettata')">Accetta</button><button class="btn-sm btn-red" onclick="rispondi('${p.id}','rifiutata')">Rifiuta</button>`
-      :stato==='accettata'
-      ?`<button class="btn-sm btn-blue" onclick="openChat('${p.id}','${cap(cl?.nome||'')} ${cap(cl?.cognome||'')}','i')">Chat</button>
-        <button class="btn-sm" style="background:rgba(251,191,36,0.18);color:#fbbf24" onclick="sonoInArrivo('${p.id}','${cap(cl?.nome||'')}')">In arrivo</button>
-        <button class="btn-sm btn-green" onclick="completaLavoro('${p.id}')">Completato</button>`
-      :'';
-    return`<div class="pren-card">
-      <div class="pren-header"><div class="pren-name">${cap(cl?.nome||'?')} ${cap(cl?.cognome||'?')}</div><span class="badge ${bc}">${sl}</span></div>
-      <div class="pren-info">📂 ${p.categoria} · 📍 ${cl?.zona||'—'}</div>
-      <div class="pren-date">📅 ${p.data_lavoro} alle ${(p.ora_lavoro||'').slice(0,5)}</div>
-      <div class="pren-desc">${p.descrizione}</div>
-      ${p.foto_url?`<img src="${p.foto_url}" style="width:100%;border-radius:12px;margin-bottom:8px;max-height:200px;object-fit:cover">`:''}
-      ${telDiv}
-      ${actions?`<div class="pren-actions">${actions}</div>`:''}
-    </div>`;
-  }).join('');
-}
-
-async function rispondi(prenId,stato){
-  await db.from('prenotazioni').update({stato}).eq('id',prenId);
-  // Prendi dati prenotazione
-  const {data:pren}=await db.from('prenotazioni').select('*,cliente:cliente_id(email,nome,cognome)').eq('id',prenId).single();
-  const cl=pren?.cliente;
-  if(cl?.email){
-    if(stato==='accettata'){
-      await sendEmail(cl.email,'✅ Il tuo intervento è stato accettato!',
-        emailTemplate('Ottima notizia!',
-          `<p>Ciao <strong>${cap(cl.nome||'')}</strong>,</p>
-          <p>Il tuo installatore ha accettato la richiesta di intervento.</p>
-          <p><strong>Data:</strong> ${pren.data_lavoro} alle ${(pren.ora_lavoro||'').slice(0,5)}</p>
-          <p>Apri l'app per vedere i dettagli e chattare con il tuo tecnico.</p>`,
-          'Apri TAP','https://taptech.it/app'));
-    } else {
-      await sendEmail(cl.email,'❌ Richiesta non disponibile',
-        emailTemplate('Intervento non disponibile',
-          `<p>Ciao <strong>${cap(cl.nome||'')}</strong>,</p>
-          <p>Purtroppo l'installatore non è disponibile per questa richiesta.</p>
-          <p>Non preoccuparti — ci sono altri tecnici certificati nella tua zona. Torna sull'app e cerca un altro installatore!</p>`,
-          'Cerca un altro tecnico','https://taptech.it/app'));
-    }
-  }
-  toast(stato==='accettata'?'✅ Accettata':'❌ Rifiutata',stato==='accettata'?'success':'error');
-  loadPrenI();
-}
-
-async function sonoInArrivo(prenId, nomeCliente){
-  // Manda messaggio automatico in chat
-  await db.from('messaggi').insert({
-    prenotazione_id: prenId,
-    mittente_id: user.id,
-    testo: '🚗 Sono in arrivo! A breve sarò da te.'
-  });
-  // Aggiorna stato prenotazione
-  await db.from('prenotazioni').update({installatore_in_arrivo: true}).eq('id', prenId);
-  toast('✅ Cliente notificato — sa che stai arrivando!', 'success');
-  loadPrenI();
-}
-
-async function completaLavoro(prenId){
-  await db.from('prenotazioni').update({stato:'completata'}).eq('id',prenId);
-  // aggiorna contatore lavori
-  const {data}=await db.from('prenotazioni').select('id').eq('installatore_id',user.id).eq('stato','completata');
-  await db.from('profiles').update({lavori_completati:(data||[]).length}).eq('id',user.id);
-  toast('✔️ Lavoro completato','success');
-  loadPrenI();
-}
-
-// ── CHAT ──
-async function openChat(prenId,nome,chi){
-  if(chatInterval) clearInterval(chatInterval);
-  curPrenId=prenId;
-  document.getElementById('chat-title').textContent='Chat con '+nome;
-  document.getElementById('chat-sub').textContent=chi==='c'?'Installatore':'Cliente';
-  document.getElementById('chat-back').onclick=()=>{clearInterval(chatInterval);chi==='c'?cTab(1):iTab(1);};
-  document.getElementById('chat-msgs').innerHTML='';
-  go('s-chat');
-  await loadMsgs();
-  chatInterval=setInterval(loadMsgs,3000);
-}
-
-async function loadMsgs(){
-  const {data}=await db.from('messaggi').select('*').eq('prenotazione_id',curPrenId).order('created_at',{ascending:true});
-  const el=document.getElementById('chat-msgs');
-  const wasBottom=el.scrollHeight-el.scrollTop-el.clientHeight<50;
-  el.innerHTML='';
-  (data||[]).forEach(m=>{
-    const div=document.createElement('div');
-    div.className='chat-msg '+(m.mittente_id===user.id?'msg-me':'msg-other');
-    div.textContent=m.testo;
-    el.appendChild(div);
-  });
-  if(wasBottom) el.scrollTop=el.scrollHeight;
-}
-
-async function sendMsg(){
-  const inp=document.getElementById('chat-msg-input');
-  const testo=inp.value.trim(); if(!testo||!curPrenId) return;
-  inp.value='';
-  await db.from('messaggi').insert({prenotazione_id:curPrenId,mittente_id:user.id,testo});
-  await loadMsgs();
-}
-
-// ── RECENSIONI ──
-function openRev(prenId,instId,instName){
-  revData={prenId,instId}; selStar=0;
-  document.getElementById('rev-inst-name').textContent=instName;
-  document.getElementById('rev-commento').value='';
-  document.querySelectorAll('.star').forEach(s=>s.classList.remove('on'));
-  openOv('ov-review');
-}
-
-function setStar(n){
-  selStar=n;
-  document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<n));
-}
-
-async function submitRec(){
-  if(!selStar) return toast('⚠️ Scegli quante stelle','error');
-  const commento=document.getElementById('rev-commento').value.trim();
-  const {error}=await db.from('recensioni').insert({prenotazione_id:revData.prenId,cliente_id:user.id,installatore_id:revData.instId,stelle:selStar,commento:commento||null});
-  if(error) return toast('❌ '+error.message,'error');
-  closeOvDirect('ov-review');
-  toast('⭐ Recensione inviata','success');
-  loadPrenC();
-}
-
-async function getRating(instId){
-  const {data}=await db.from('recensioni').select('stelle').eq('installatore_id',instId);
-  if(!data?.length) return null;
-  return{avg:(data.reduce((s,r)=>s+r.stelle,0)/data.length).toFixed(1),count:data.length};
-}
-
-async function loadInstRec(){
-  const {data}=await db.from('recensioni').select('*,cliente:cliente_id(nome,cognome)').eq('installatore_id',user.id).order('created_at',{ascending:false}).limit(5);
-  const el=document.getElementById('p-recensioni');
-  if(!el) return;
-  if(!data?.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">Nessuna recensione ancora</div>';return;}
-  const avg=(data.reduce((s,r)=>s+r.stelle,0)/data.length).toFixed(1);
-  el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-    <div style="font-size:30px;font-weight:900;color:var(--yellow)">${avg}</div>
-    <div><div style="color:var(--yellow);font-size:14px">${'⭐'.repeat(Math.round(avg))}</div><div style="font-size:11px;color:var(--muted)">${data.length} recensioni</div></div>
-  </div>`+data.map(r=>`<div class="rec-card">
-    <div class="rec-stars">${'⭐'.repeat(r.stelle)}</div>
-    ${r.commento?`<div class="rec-text">${r.commento}</div>`:''}
-    <div class="rec-author">${cap(r.cliente?.nome||'?')} ${cap(r.cliente?.cognome||'?')}</div>
-  </div>`).join('');
-}
-
-// ── MODIFICA PROFILO ──
-function openEdit(ruolo){
-  editRuolo=ruolo;
-  document.getElementById('e-nome').value=prof?.nome||'';
-  document.getElementById('e-cognome').value=prof?.cognome||'';
-  document.getElementById('e-tel').value=prof?.telefono||'';
-  document.getElementById('e-zona').value=prof?.zona||'';
-  document.getElementById('e-inst-fields').style.display=ruolo==='installatore'?'block':'none';
-  if(ruolo==='installatore'){
-    document.getElementById('e-esp').value=prof?.esperienza||'';
-    document.getElementById('e-piva').value=prof?.partita_iva||'';
-  }
-  openOv('ov-edit');
-}
-
-async function saveEdit(){
-  const nome=document.getElementById('e-nome').value.trim();
-  const cognome=document.getElementById('e-cognome').value.trim();
-  const tel=document.getElementById('e-tel').value.trim();
-  const zona=document.getElementById('e-zona').value.trim();
-  if(!nome||!cognome) return toast('⚠️ Nome e cognome obbligatori','error');
-  const upd={nome,cognome,telefono:tel,zona};
-  if(editRuolo==='installatore'){
-    upd.esperienza=parseInt(document.getElementById('e-esp').value)||0;
-    upd.partita_iva=document.getElementById('e-piva').value.trim()||null;
-  }
-  const {error}=await db.from('profiles').update(upd).eq('id',user.id);
-  if(error) return toast('❌ '+error.message,'error');
-  Object.assign(prof,upd);
-  closeOvDirect('ov-edit');
-  toast('✅ Profilo aggiornato','success');
-  if(editRuolo==='installatore') showInstDash();
-  else{loadProfiloC();document.getElementById('c-welcome').textContent=cap(prof.nome);}
-}
-
-// ── RESET PASSWORD ──
-async function resetPassword(){
-  const email=document.getElementById('rp-email').value.trim();
-  if(!email) return toast('⚠️ Inserisci la tua email','error');
-  const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
-  if(error) return toast('❌ '+error.message,'error');
-  toast('📧 Link inviato alla tua email','success');
-  setTimeout(()=>go('s-login'),2000);
-}
-
-// ── REGISTER CLIENTE ──
-async function regCliente(){
-  const nome=document.getElementById('c-nome').value.trim();
-  const cognome=document.getElementById('c-cognome').value.trim();
-  const eta=document.getElementById('c-eta').value;
-  const sesso=document.getElementById('c-sesso').value;
-  const zona=document.getElementById('c-zona').value.trim();
-  const tel=document.getElementById('c-tel').value.trim();
-  const email=document.getElementById('c-email').value.trim();
-  const pw=document.getElementById('c-pw').value;
-  if(!nome||!cognome||!zona||!email||!pw) return toast('⚠️ Compila tutti i campi','error');
-  if(pw.length<6) return toast('⚠️ Password troppo corta','error');
-  toast('Creazione account...');
-  const {data,error}=await db.auth.signUp({email,password:pw});
-  if(error) return toast('❌ '+error.message,'error');
-  await db.from('profiles').upsert({id:data.user.id,nome,cognome,eta:parseInt(eta)||null,sesso,zona,telefono:tel,ruolo:'cliente',email,lavori_completati:0});
-  user=data.user; prof={nome,cognome,zona,telefono:tel,sesso,ruolo:'cliente',email};
-  toast('✅ Benvenuto su TAP','success');
-  setTimeout(()=>showClienteDash(),800);
-}
-
-// ── REGISTER INSTALLATORE ──
-async function regInstallatore(){
-  const nome=document.getElementById('i-nome').value.trim();
-  const cognome=document.getElementById('i-cognome').value.trim();
-  const eta=document.getElementById('i-eta').value;
-  const sesso=document.getElementById('i-sesso').value;
-  const zona=document.getElementById('i-zona').value.trim();
-  const tel=document.getElementById('i-tel').value.trim();
-  const piva=document.getElementById('i-piva').value.trim();
-  const esp=document.getElementById('i-esp').value;
-  const email=document.getElementById('i-email').value.trim();
-  const pw=document.getElementById('i-pw').value;
-  const specs=getSpecs();
-  const prezzi=getPrices();
-  if(!nome||!cognome||!zona||!tel||!email||!pw) return toast('⚠️ Compila tutti i campi','error');
-  if(pw.length<6) return toast('⚠️ Password troppo corta','error');
-  if(!specs.length) return toast('⚠️ Seleziona almeno una specializzazione','error');
-  toast('Creazione account...');
-  const {data,error}=await db.auth.signUp({email,password:pw});
-  if(error) return toast('❌ '+error.message,'error');
-  await db.from('profiles').upsert({id:data.user.id,nome,cognome,eta:parseInt(eta)||null,sesso,zona,telefono:tel,partita_iva:piva||null,esperienza:parseInt(esp)||0,specializzazioni:specs,prezzi,ruolo:'installatore',disponibile:false,email,lavori_completati:0,verificato:false});
-  user=data.user; prof={nome,cognome,zona,telefono:tel,partita_iva:piva,esperienza:parseInt(esp)||0,specializzazioni:specs,prezzi,ruolo:'installatore',disponibile:false,email,lavori_completati:0,verificato:false};
-  // Carica certificazioni
-  if(certFields.length>0){
-    toast('Caricamento certificazioni...');
-    await uploadCertificazioni(data.user.id);
-  }
-  toast('✅ Registrazione completata! Il profilo sarà attivo dopo la verifica.','success');
-  // Email admin nuovo installatore
-  await sendEmail(ADMIN_EMAIL,'🔧 Nuovo installatore da verificare su TAP',
-    emailTemplate('Nuovo installatore registrato',
-      `<p>Un nuovo installatore si è registrato su TAP e attende verifica.</p>
-      <p><strong>Nome:</strong> ${cap(nome)} ${cap(cognome)}</p>
-      <p><strong>Zona:</strong> ${zona}</p>
-      <p><strong>Telefono:</strong> ${tel}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Specializzazioni:</strong> ${specs.join(', ')}</p>
-      <p>Accedi al pannello admin per verificare i documenti.</p>`,
-      'Vai al pannello Admin','https://taptech.it/app'));
-  // Email all'installatore
-  await sendEmail(email,'👋 Benvenuto su TAP — In attesa di verifica',
-    emailTemplate(`Benvenuto${sesso==='F'?'a':''} su TAP, ${cap(nome)}!`,
-      `<p>La tua registrazione è stata ricevuta con successo.</p>
-      <p>Il team TAP verificherà le tue certificazioni entro 24-48 ore.</p>
-      <p>Una volta approvato, il tuo profilo sarà visibile ai clienti nella tua zona.</p>
-      <p>Per qualsiasi informazione: <a href="mailto:info@taptech.it" style="color:#f26522">info@taptech.it</a></p>`,
-      null,null));
-  setTimeout(()=>showInstDash(),1200);
-}
-
-// ── LOGIN ──
-async function doLogin(){
-  const email=document.getElementById('l-email').value.trim();
-  const pw=document.getElementById('l-pw').value;
-  if(!email||!pw) return toast('⚠️ Inserisci email e password','error');
-  toast('Accesso in corso...');
-  const {data,error}=await db.auth.signInWithPassword({email,password:pw});
-  if(error) return toast('❌ Email o password errata','error');
-  user=data.user; await loadProf();
-}
-
-async function doLogout(){
-  if(chatInterval) clearInterval(chatInterval);
-  await db.auth.signOut(); user=null; prof=null;
-  toast('Arrivederci');
-  setTimeout(()=>go('s-home'),500);
-}
-
-// ── DASHBOARDS ──
-function showClienteDash(){
-  go('s-dash-c');
-  document.getElementById('c-welcome').textContent=cap(prof?.nome||'');
-  setTimeout(checkAdmin, 500);
-}
-
-function showInstDash(){
-  go('s-dash-i');
-  const ini=((prof?.nome||'?')[0]+(prof?.cognome||'?')[0]).toUpperCase();
-  const ac=avatarColor(prof?.nome);
-  const avEl=document.getElementById('i-avatar');
-  if(prof?.avatar_url) avEl.innerHTML=`<img src="${prof.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-  else{avEl.textContent=ini;avEl.style.background=`linear-gradient(135deg,${ac},${ac}cc)`;}
-  document.getElementById('i-welcome').textContent=cap(prof?.nome||'');
-  // Badge verificato
-  const welcomeEl=document.getElementById('i-welcome');
-  const oldBadge=document.getElementById('verif-badge');
-  if(oldBadge) oldBadge.remove();
-  if(prof?.verificato){
-    const b=document.createElement('span');
-    b.id='verif-badge';
-    b.className='badge badge-ver';
-    b.textContent='✓ Verificato';
-    b.style.marginLeft='8px';
-    welcomeEl.parentElement.appendChild(b);
-  }
-  // Messaggio in attesa verifica
-  const oldMsg=document.getElementById('verif-msg');
-  if(oldMsg) oldMsg.remove();
-  if(!prof?.verificato){
-    const msg=document.createElement('div');
-    msg.id='verif-msg';
-    msg.style.cssText='background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:12px;padding:12px 14px;font-size:12px;color:#fbbf24;line-height:1.6;width:calc(100% - 36px);margin:0 18px 12px;';
-    msg.innerHTML='<strong>Profilo in attesa di verifica</strong><br>TAP sta verificando le tue certificazioni. Riceverai una notifica quando il profilo sarà attivo e visibile ai clienti.';
-    document.getElementById('avail-tog').closest('.toggle-card').after(msg);
-  }
-  document.getElementById('p-zona').textContent=prof?.zona||'—';
-  document.getElementById('p-tel').textContent=prof?.telefono||'—';
-  document.getElementById('p-esp').textContent=prof?.esperienza?prof.esperienza+' anni':'—';
-  document.getElementById('p-piva').textContent=prof?.partita_iva||'Non inserita';
-  document.getElementById('p-lavori').textContent=(prof?.lavori_completati||0)+' lavori';
-  document.getElementById('p-specs').innerHTML=(prof?.specializzazioni||[]).map(s=>`<span class="tag tag-orange">${s}</span>`).join('')||'—';
-  const pp=prof?.prezzi||{};
-  document.getElementById('p-prices').innerHTML=(CATS.filter(c=>pp[c.id]).map(c=>`
-    <div class="info-row"><span class="info-label">${c.emoji} ${c.name}</span><span class="info-val" style="color:var(--green)">€${pp[c.id].min}–${pp[c.id].max} <span style="color:var(--muted);font-size:11px">(solo manodopera)</span></span></div>`).join('')||'<div style="color:var(--muted);font-size:13px">Nessun prezzo impostato</div>')+'<div style="margin-top:12px"><button class="btn btn-secondary" style="width:100%;height:42px;font-size:14px" onclick="openEditPrezzi()">✏️ Modifica prezzi</button></div>';
-  isAvail=prof?.disponibile!==false; updateToggle();
-  loadInstRec();
-}
-
-async function toggleAvail(){
-  isAvail=!isAvail; updateToggle();
-  if(user) await db.from('profiles').update({disponibile:isAvail}).eq('id',user.id);
-  toast(isAvail?'✅ Visibile ai clienti':'🔴 Nascosto dalla ricerca');
-}
-function updateToggle(){
-  document.getElementById('avail-tog').classList.toggle('on',isAvail);
-  document.getElementById('tog-txt').textContent=isAvail?'Disponibile':'Non disponibile';
-  document.getElementById('tog-sub').textContent=isAvail?'I clienti possono trovarti':'Sei nascosto dalla ricerca';
-}
-
-// ── PRICE ROWS ──
-function buildPriceRows(){
-  document.getElementById('price-rows').innerHTML=CATS.map(c=>`
-    <div class="price-row">
-      <label>${c.emoji} ${c.name}</label>
-      <div class="price-inputs">
-        <input class="price-input" id="pr-min-${c.id}" type="number" placeholder="Min" min="0">
-        <span style="font-size:11px;color:var(--muted)">–</span>
-        <input class="price-input" id="pr-max-${c.id}" type="number" placeholder="Max" min="0">
-        <span style="font-size:11px;color:var(--muted);margin-left:2px">€</span>
-      </div>
-    </div>`).join('');
-}
-function getPrices(){const p={};CATS.forEach(c=>{const mn=document.getElementById('pr-min-'+c.id)?.value;const mx=document.getElementById('pr-max-'+c.id)?.value;if(mn||mx)p[c.id]={min:parseInt(mn)||0,max:parseInt(mx)||0};});return p;}
-function toggleSpec(el){el.classList.toggle('sel');}
-function getSpecs(){return[...document.querySelectorAll('#spec-wrap .spec-tag.sel')].map(e=>e.dataset.v);}
-
-// ── AI ──
-function addMsg(wrap,cls,text){
-  const el=document.getElementById(wrap);
-  if(!el) return;
-  const div=document.createElement('div');
-  div.className='chat-msg '+cls; div.textContent=text;
-  el.appendChild(div); el.scrollTop=el.scrollHeight;
-}
-function addTyping(wrap){
-  const el=document.getElementById(wrap);
-  const div=document.createElement('div');
-  div.className='chat-msg msg-ai';
-  div.innerHTML='<div class="typing-dots"><span></span><span></span><span></span></div>';
-  el.appendChild(div); el.scrollTop=el.scrollHeight; return div;
-}
-
-async function sendAI(who){
-  const iid=who==='c'?'chat-c-input':'chat-i-input';
-  const wid=who==='c'?'chat-c-msgs':'chat-i-msgs';
-  const inp=document.getElementById(iid);
-  const msg=inp.value.trim(); if(!msg) return;
-  inp.value=''; addMsg(wid,'msg-user',msg);
-  const t=addTyping(wid);
-  const r=await callAI(msg,who==='c'?'cliente':'installatore');
-  t.remove(); addMsg(wid,'msg-ai',r);
-}
-
-async function callAI(msg,ruolo){
-  try{
-    const sys=ruolo==='cliente'
-      ?'Sei l\'assistente tecnico dell\'app TAP per trovare installatori termoidraulici. Rispondi in italiano in modo semplice e chiaro a domande tecniche su caldaie, riscaldamento, idraulica, bagni, gas e impianti. Sii conciso e pratico. Se il problema è urgente, consiglia di contattare subito un installatore tramite l\'app.'
-      :'Sei l\'assistente tecnico dell\'app TAP per installatori termoidraulici professionisti. Rispondi in italiano a domande tecniche su interventi idraulici, caldaie, impianti di riscaldamento, normative e best practice. Sii tecnico ma chiaro e conciso.';
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,system:sys,messages:[{role:'user',content:msg}]})});
-    const d=await res.json();
-    return d.content?.[0]?.text||'Mi dispiace, riprova tra poco.';
-  }catch(e){return 'Connessione assente. Riprova.';}
-}
-
-async function openEditPrezzi(){
-  const pp=prof?.prezzi||{};
-  const cats=CATS.filter(c=>prof?.specializzazioni?.includes(c.id));
-  if(!cats.length){toast('Nessuna specializzazione impostata','error');return;}
-  let html='<div style="padding:16px"><h3 style="margin-bottom:16px">✏️ Modifica prezzi</h3>';
-  cats.forEach(c=>{
-    const v=pp[c.id]||{min:'',max:''};
-    html+=`<div style="margin-bottom:12px"><div style="font-size:13px;color:var(--muted);margin-bottom:6px">${c.emoji} ${c.name} <span style="color:var(--orange);font-size:11px">(solo manodopera)</span></div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <input id="ep-min-${c.id}" type="number" value="${v.min}" placeholder="Min €" style="flex:1;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none">
-      <span style="color:var(--muted)">–</span>
-      <input id="ep-max-${c.id}" type="number" value="${v.max}" placeholder="Max €" style="flex:1;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none">
-    </div></div>`;
-  });
-  html+=`<button class="btn btn-orange" style="width:100%;margin-top:16px" onclick="saveEditPrezzi()">💾 Salva prezzi</button></div>`;
-  document.getElementById('ov-content').innerHTML=html;
-  document.getElementById('ov-generic').style.display='flex';
-}
-
-async function saveEditPrezzi(){
-  const cats=CATS.filter(c=>prof?.specializzazioni?.includes(c.id));
-  const nuoviPrezzi={...prof?.prezzi||{}};
-  cats.forEach(c=>{
-    const mn=document.getElementById('ep-min-'+c.id)?.value;
-    const mx=document.getElementById('ep-max-'+c.id)?.value;
-    if(mn&&mx) nuoviPrezzi[c.id]={min:parseInt(mn),max:parseInt(mx)};
-  });
-  await db.from('profiles').update({prezzi:nuoviPrezzi}).eq('id',user.id);
-  prof.prezzi=nuoviPrezzi;
-  document.getElementById('ov-generic').style.display='none';
-  toast('✅ Prezzi aggiornati!','success');
-  loadProfI();
-}
-
-window.addEventListener('load',init);
+// No redirect - everyone sees the website
 </script>
+
 </body>
 </html>
