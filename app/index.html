@@ -1081,7 +1081,7 @@ async function approvaDoc(certId, instId){
   // Controlla se tutte le cert sono approvate → verifica profilo
   const {data} = await db.from('certificazioni').select('stato').eq('installatore_id', instId);
   const tutteOk = data?.every(c=>c.stato==='approvata');
-  if(tutteOk) await db.from('profiles').update({verificato:true}).eq('id', instId);
+  if(tutteOk) await db.from('profiles').update({verificato:true, disponibile:true}).eq('id', instId);
   toast('✅ Certificazione approvata','success');
   loadAdmin('in_attesa');
 }
