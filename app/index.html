@@ -549,6 +549,7 @@ html,body{width:100%;height:100%;background:#000;font-family:'Nunito',sans-serif
         <span class="info-label">Specializzazioni</span>
         <div style="display:flex;flex-wrap:wrap;gap:5px" id="p-specs"></div>
       </div>
+      <div style="margin-top:12px"><button class="btn btn-secondary" style="width:100%;height:42px;font-size:14px" onclick="openAddCert()">📄 Carica nuova certificazione</button></div>
     </div>
     <div class="info-card">
       <h3>I tuoi prezzi</h3>
@@ -672,6 +673,9 @@ html,body{width:100%;height:100%;background:#000;font-family:'Nunito',sans-serif
       </div>
       <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="saveEdit()">Salva modifiche</button>
     </div>
+  <div id="ov-generic" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:flex-end;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:var(--bg2,#141414);width:100%;max-width:480px;max-height:85vh;overflow-y:auto;border-radius:20px 20px 0 0" id="ov-content"></div>
+  </div>
   </div>
 
   <div class="home-bar"></div>
@@ -846,7 +850,22 @@ async function loadProf(){
 }
 
 function hide(id){const el=document.getElementById(id);if(el)el.style.display='none';}
-function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');}
+function go(id, opts){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el)el.classList.add('active');
+  if(!opts || !opts.skipHistory){
+    if(history.state && history.state.screen===id){
+      history.replaceState({screen:id}, '');
+    } else {
+      history.pushState({screen:id}, '');
+    }
+  }
+}
+window.addEventListener('popstate', function(e){
+  const id = e.state && e.state.screen ? e.state.screen : 's-home';
+  go(id, {skipHistory:true});
+});
 function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(type==='error'?'err':type==='success'?'ok':'');setTimeout(()=>t.classList.remove('show'),3000);}
 function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1).toLowerCase():'';}
 function avatarColor(n){const c=['#f26522','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444'];return c[(n||'').charCodeAt(0)%c.length];}
@@ -1642,7 +1661,82 @@ async function saveEditPrezzi(){
   prof.prezzi=nuoviPrezzi;
   document.getElementById('ov-generic').style.display='none';
   toast('✅ Prezzi aggiornati!','success');
-  loadProfI();
+  showInstDash();
+}
+
+let addCertFields = [];
+
+function openAddCert(){
+  addCertFields = [];
+  let html = '<div style="padding:16px"><h3 style="margin-bottom:16px">📄 Carica nuova certificazione</h3><div id="add-cert-list" style="display:flex;flex-direction:column;gap:8px"></div><button class="btn-sm btn-secondary" style="width:100%;margin-top:8px;border:1px solid var(--border)" onclick="addCertFieldDash()">+ Aggiungi certificazione</button><button class="btn btn-orange" style="width:100%;margin-top:16px" onclick="saveAddCert()">💾 Invia per verifica</button></div>';
+  document.getElementById('ov-content').innerHTML = html;
+  document.getElementById('ov-generic').style.display = 'flex';
+  addCertFieldDash();
+}
+
+function addCertFieldDash(){
+  const id = Date.now();
+  addCertFields.push(id);
+  const el = document.getElementById('add-cert-list');
+  const div = document.createElement('div');
+  div.id = 'addcert-'+id;
+  div.style.cssText = 'background:var(--bg3);border:1px solid var(--border);border-radius:13px;padding:12px;display:flex;flex-direction:column;gap:8px';
+  div.innerHTML = `
+    <select id="addcert-tipo-${id}" style="width:100%;height:44px;padding:0 12px;background:var(--bg4);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:Nunito,sans-serif;font-size:13px;font-weight:600;outline:none;-webkit-appearance:none">
+      <option value="">Seleziona tipo certificazione...</option>
+      ${CERT_TIPI.map(t=>`<option value="${t}">${t}</option>`).join('')}
+    </select>
+    <div style="display:flex;align-items:center;gap:8px">
+      <label style="flex:1;background:var(--bg4);border:1px solid var(--border);border-radius:10px;height:44px;display:flex;align-items:center;padding:0 12px;cursor:pointer;font-size:13px;color:var(--muted);font-weight:600">
+        <input type="file" id="addcert-file-${id}" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="onAddCertFileChange(event,${id})">
+        <span id="addcert-file-label-${id}">Carica documento (PDF/foto)</span>
+      </label>
+      <button onclick="removeAddCert(${id})" style="width:36px;height:36px;background:rgba(248,113,113,0.15);border:none;border-radius:10px;color:var(--red);cursor:pointer;font-size:16px;flex-shrink:0">×</button>
+    </div>
+  `;
+  el.appendChild(div);
+}
+
+function removeAddCert(id){
+  addCertFields = addCertFields.filter(f=>f!==id);
+  document.getElementById('addcert-'+id)?.remove();
+}
+
+function onAddCertFileChange(e, id){
+  const file = e.target.files?.[0];
+  if(file) document.getElementById('addcert-file-label-'+id).textContent = '✓ '+file.name;
+}
+
+async function saveAddCert(){
+  const uploaded = [];
+  for(const id of addCertFields){
+    const tipo = document.getElementById('addcert-tipo-'+id)?.value;
+    const file = document.getElementById('addcert-file-'+id)?.files?.[0];
+    if(!tipo || !file) continue;
+    const ext = file.name.split('.').pop();
+    const path = `${user.id}/certificazioni/${tipo.substring(0,30).replace(/\s/g,'_')}_${Date.now()}.${ext}`;
+    const {error} = await db.storage.from('tap-files').upload(path, file, {upsert:true});
+    let fileUrl = null;
+    if(!error){
+      const {data} = db.storage.from('tap-files').getPublicUrl(path);
+      fileUrl = data.publicUrl;
+    }
+    await db.from('certificazioni').insert({installatore_id:user.id, tipo, file_url:fileUrl, stato:'in_attesa'});
+    uploaded.push(tipo);
+  }
+  if(!uploaded.length){
+    toast('Seleziona almeno un tipo e un documento','error');
+    return;
+  }
+  await sendEmail(ADMIN_EMAIL,'📋 Nuova certificazione da verificare su TAP',
+    emailTemplate('Nuova certificazione caricata',
+      `<p>Un installatore già registrato ha caricato ${uploaded.length===1?'una nuova certificazione':'nuove certificazioni'} da verificare.</p>
+      <p><strong>Tipo:</strong> ${uploaded.join(', ')}</p>
+      <p>Accedi al pannello admin per controllare i documenti.</p>`,
+      'Vai al pannello Admin','https://taptech.it/app'));
+  document.getElementById('ov-generic').style.display = 'none';
+  toast('✅ Certificazione inviata per verifica!','success');
+  showInstDash();
 }
 
 window.addEventListener('load',init);
