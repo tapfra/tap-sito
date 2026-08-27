@@ -27,7 +27,7 @@ html,body{width:100%;height:100%;background:#000;font-family:'Nunito',sans-serif
 .home-bar{display:none}
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s ease;overflow:hidden}
 .screen.active{opacity:1;pointer-events:all}
-.scroll-screen{justify-content:flex-start;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.scroll-screen{justify-content:flex-start;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:90px}
 .screen::before{content:'';position:absolute;top:5%;left:50%;transform:translateX(-50%);width:380px;height:380px;background:radial-gradient(circle,rgba(242,101,34,0.1) 0%,transparent 65%);pointer-events:none;z-index:0;animation:breathe 5s ease-in-out infinite}
 @keyframes breathe{0%,100%{opacity:.6;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.1)}}
 @keyframes riseIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
@@ -110,7 +110,7 @@ html,body{width:100%;height:100%;background:#000;font-family:'Nunito',sans-serif
 .small-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0}
 
 /* TAB BAR */
-.tab-bar{position:absolute;bottom:0;left:0;right:0;height:76px;background:rgba(13,13,13,0.96);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:150;padding-bottom:6px}
+.tab-bar{position:fixed;bottom:0;left:0;right:0;height:76px;background:rgba(13,13,13,0.96);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:150;padding-bottom:6px}
 .tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding-top:8px}
 .tab-icon{font-size:20px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.4)}
 .tab-label{font-size:10px;font-weight:700;color:var(--muted)}
@@ -673,9 +673,10 @@ html,body{width:100%;height:100%;background:#000;font-family:'Nunito',sans-serif
       </div>
       <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="saveEdit()">Salva modifiche</button>
     </div>
+  </div>
+
   <div id="ov-generic" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:flex-end;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
     <div style="background:var(--bg2,#141414);width:100%;max-width:480px;max-height:85vh;overflow-y:auto;border-radius:20px 20px 0 0" id="ov-content"></div>
-  </div>
   </div>
 
   <div class="home-bar"></div>
@@ -1632,7 +1633,7 @@ async function callAI(msg,ruolo){
 
 async function openEditPrezzi(){
   const pp=prof?.prezzi||{};
-  const cats=CATS.filter(c=>prof?.specializzazioni?.includes(c.id));
+  const cats=CATS.filter(c=>prof?.specializzazioni?.includes(c.spec));
   if(!cats.length){toast('Nessuna specializzazione impostata','error');return;}
   let html='<div style="padding:16px"><h3 style="margin-bottom:16px">✏️ Modifica prezzi</h3>';
   cats.forEach(c=>{
@@ -1650,7 +1651,7 @@ async function openEditPrezzi(){
 }
 
 async function saveEditPrezzi(){
-  const cats=CATS.filter(c=>prof?.specializzazioni?.includes(c.id));
+  const cats=CATS.filter(c=>prof?.specializzazioni?.includes(c.spec));
   const nuoviPrezzi={...prof?.prezzi||{}};
   cats.forEach(c=>{
     const mn=document.getElementById('ep-min-'+c.id)?.value;
