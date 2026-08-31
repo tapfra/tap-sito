@@ -538,6 +538,10 @@ html,body{width:100%;height:100%;background:#000;font-family:'Nunito',sans-serif
       <div class="toggle-info"><h4 id="tog-txt">Disponibile</h4><p id="tog-sub">I clienti possono trovarti</p></div>
       <div class="toggle on" id="avail-tog" onclick="toggleAvail()"></div>
     </div>
+    <div id="notif-card" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin:0 18px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div><h4 style="font-size:14px;margin-bottom:2px" id="notif-txt">Notifiche</h4><p style="font-size:12px;color:var(--muted)" id="notif-sub">Ricevi un avviso quando arriva un lavoro</p></div>
+      <button class="btn-sm btn-secondary" id="notif-btn" style="white-space:nowrap" onclick="enablePush()">🔔 Attiva</button>
+    </div>
     <div class="info-card">
       <h3>I tuoi dati</h3>
       <div class="info-row"><span class="info-label">Zona</span><span class="info-val" id="p-zona">—</span></div>
@@ -1147,6 +1151,7 @@ async function submitBooking(){
         <p>Accedi all'app per accettare o rifiutare la richiesta.</p>`,
         'Apri TAP','https://taptech.it/app'));
   }
+  sendPushToInstaller(bookInst.id, '🔧 Nuova richiesta su TAP', `Hai una nuova richiesta da ${cap(clProf?.nome||'')} ${cap(clProf?.cognome||'')} per ${curCatSpec}`);
   // Email admin
   await sendEmail(ADMIN_EMAIL,'📋 Nuova prenotazione su TAP',
     emailTemplate('Nuova prenotazione',
@@ -1566,6 +1571,7 @@ function showInstDash(){
   document.getElementById('p-prices').innerHTML=(CATS.filter(c=>pp[c.id]).map(c=>`
     <div class="info-row"><span class="info-label">${c.emoji} ${c.name}</span><span class="info-val" style="color:var(--green)">€${pp[c.id].min}–${pp[c.id].max} <span style="color:var(--muted);font-size:11px">(solo manodopera)</span></span></div>`).join('')||'<div style="color:var(--muted);font-size:13px">Nessun prezzo impostato</div>')+'<div style="margin-top:12px"><button class="btn btn-secondary" style="width:100%;height:42px;font-size:14px" onclick="openEditPrezzi()">✏️ Modifica prezzi</button></div>';
   isAvail=prof?.disponibile!==false; updateToggle();
+  updateNotifCard();
   loadInstRec();
   loadMyCerts();
 }
@@ -1760,6 +1766,72 @@ async function saveAddCert(){
   document.getElementById('ov-generic').style.display = 'none';
   toast('✅ Certificazione inviata per verifica!','success');
   showInstDash();
+}
+
+const VAPID_PUBLIC_KEY = 'BLNQBtv2e4qC5sd-FlMvyWxrgGGJXpL6bVx_8blyOYyAnxHg2IDH92vibf5QA8wsWhv_k1vMFZwC9k4pXxo6Ehs';
+
+function urlBase64ToUint8Array(base64String){
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g,'+').replace(/_/g,'/');
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));
+}
+
+async function updateNotifCard(){
+  const card = document.getElementById('notif-card');
+  if(!card || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  card.style.display = 'flex';
+  try{
+    const reg = await navigator.serviceWorker.getRegistration('/app/');
+    const sub = reg ? await reg.pushManager.getSubscription() : null;
+    const btn = document.getElementById('notif-btn');
+    if(sub){
+      document.getElementById('notif-sub').textContent = 'Notifiche attive su questo dispositivo';
+      btn.textContent = '✓ Attive';
+      btn.disabled = true;
+    } else {
+      document.getElementById('notif-sub').textContent = 'Ricevi un avviso quando arriva un lavoro';
+      btn.textContent = '🔔 Attiva';
+      btn.disabled = false;
+    }
+  }catch(e){}
+}
+
+async function enablePush(){
+  if(!('serviceWorker' in navigator) || !('PushManager' in window)){
+    toast('Il tuo browser non supporta le notifiche','error');
+    return;
+  }
+  try{
+    const perm = await Notification.requestPermission();
+    if(perm !== 'granted'){
+      toast('Permesso notifiche non concesso','error');
+      return;
+    }
+    const reg = await navigator.serviceWorker.register('/app/sw.js', {scope:'/app/'});
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    await db.from('profiles').update({push_subscription: sub.toJSON()}).eq('id', user.id);
+    toast('🔔 Notifiche attivate!','success');
+    updateNotifCard();
+  }catch(e){
+    console.error(e);
+    toast('Errore attivazione notifiche','error');
+  }
+}
+
+async function sendPushToInstaller(instId, title, body){
+  try{
+    const {data:p} = await db.from('profiles').select('push_subscription').eq('id', instId).single();
+    if(!p?.push_subscription) return;
+    await fetch('/.netlify/functions/send-push', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({subscription:p.push_subscription, title, body, url:'/app/index.html'})
+    });
+  }catch(e){ console.error('Push non inviata:', e); }
 }
 
 window.addEventListener('load',init);
