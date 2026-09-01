@@ -1187,7 +1187,6 @@ async function loadPrenC(){
     const bc=stato==='in_attesa'?'badge-wait':stato==='accettata'?'badge-ok':'badge-no';
     const sl=stato==='in_attesa'?'⏳ In attesa':stato==='accettata'?'✅ Accettata':stato==='rifiutata'?'❌ Rifiutata':'✔️ Completata';
     const inst=p.installatore;
-    const telDiv=stato==='accettata'&&inst?.telefono?`<div class="tel-reveal">📞 ${inst.telefono}</div>`:'';
     const chatBtn=stato==='accettata'?`<button class="btn-sm btn-blue" onclick="openChat('${p.id}','${cap(inst?.nome||'')} ${cap(inst?.cognome||'')}','c')">Chat</button>`:'';
     const recBtn=stato==='accettata'?`<button class="btn-sm btn-yellow" onclick="openRev('${p.id}','${p.installatore_id}','${cap(inst?.nome||'')} ${cap(inst?.cognome||'')}')">Recensisci</button>`:'';
     const arrivoDiv=p.installatore_in_arrivo&&stato==='accettata'?`<div style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.35);border-radius:12px;padding:12px 14px;margin-bottom:8px;font-size:13px;font-weight:800;color:#fbbf24;display:flex;align-items:center;gap:8px"><span style="font-size:20px">🚗</span> Il tuo installatore sta arrivando!</div>`:'';
@@ -1197,7 +1196,6 @@ async function loadPrenC(){
       <div class="pren-date">📅 ${p.data_lavoro} alle ${(p.ora_lavoro||'').slice(0,5)}</div>
       <div class="pren-desc">${p.descrizione}</div>
       ${arrivoDiv}
-      ${telDiv}
       ${chatBtn||recBtn?`<div class="pren-actions">${chatBtn}${recBtn}</div>`:''}
     </div>`;
   }).join('');
@@ -1240,7 +1238,6 @@ async function loadPrenI(){
     const bc=stato==='in_attesa'?'badge-wait':stato==='accettata'?'badge-ok':'badge-no';
     const sl=stato==='in_attesa'?'⏳ In attesa':stato==='accettata'?'✅ Accettata':stato==='rifiutata'?'❌ Rifiutata':'✔️ Completata';
     const cl=p.cliente;
-    const telDiv=stato==='accettata'&&cl?.telefono?`<div class="tel-reveal">📞 ${cl.telefono}</div>`:'';
     const actions=stato==='in_attesa'
       ?`<button class="btn-sm btn-green" onclick="rispondi('${p.id}','accettata')">Accetta</button><button class="btn-sm btn-red" onclick="rispondi('${p.id}','rifiutata')">Rifiuta</button>`
       :stato==='accettata'
@@ -1254,7 +1251,6 @@ async function loadPrenI(){
       <div class="pren-date">📅 ${p.data_lavoro} alle ${(p.ora_lavoro||'').slice(0,5)}</div>
       <div class="pren-desc">${p.descrizione}</div>
       ${p.foto_url?`<img src="${p.foto_url}" style="width:100%;border-radius:12px;margin-bottom:8px;max-height:200px;object-fit:cover">`:''}
-      ${telDiv}
       ${actions?`<div class="pren-actions">${actions}</div>`:''}
     </div>`;
   }).join('');
@@ -1650,12 +1646,10 @@ async function sendAI(who){
 
 async function callAI(msg,ruolo){
   try{
-    const sys=ruolo==='cliente'
-      ?'Sei l\'assistente tecnico dell\'app TAP per trovare installatori termoidraulici. Rispondi in italiano in modo semplice e chiaro a domande tecniche su caldaie, riscaldamento, idraulica, bagni, gas e impianti. Sii conciso e pratico. Se il problema è urgente, consiglia di contattare subito un installatore tramite l\'app.'
-      :'Sei l\'assistente tecnico dell\'app TAP per installatori termoidraulici professionisti. Rispondi in italiano a domande tecniche su interventi idraulici, caldaie, impianti di riscaldamento, normative e best practice. Sii tecnico ma chiaro e conciso.';
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,system:sys,messages:[{role:'user',content:msg}]})});
+    const res=await fetch('/.netlify/functions/ai-assistant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,ruolo})});
     const d=await res.json();
-    return d.content?.[0]?.text||'Mi dispiace, riprova tra poco.';
+    if(!res.ok) return 'Mi dispiace, riprova tra poco.';
+    return d.text||'Mi dispiace, riprova tra poco.';
   }catch(e){return 'Connessione assente. Riprova.';}
 }
 
