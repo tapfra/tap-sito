@@ -1280,6 +1280,13 @@ async function rispondi(prenId,stato){
     }
   }
   toast(stato==='accettata'?'✅ Accettata':'❌ Rifiutata',stato==='accettata'?'success':'error');
+  await sendEmail(ADMIN_EMAIL, stato==='accettata'?'✅ Richiesta accettata su TAP':'❌ Richiesta rifiutata su TAP',
+    emailTemplate(stato==='accettata'?'Richiesta accettata':'Richiesta rifiutata',
+      `<p>L'installatore <strong>${cap(prof?.nome||'')} ${cap(prof?.cognome||'')}</strong> ha ${stato==='accettata'?'accettato':'rifiutato'} una richiesta.</p>
+      <p><strong>Cliente:</strong> ${cap(cl?.nome||'')} ${cap(cl?.cognome||'')}</p>
+      <p><strong>Categoria:</strong> ${pren?.categoria||''}</p>
+      <p><strong>Data:</strong> ${pren?.data_lavoro||''} alle ${(pren?.ora_lavoro||'').slice(0,5)}</p>`,
+      null,null));
   loadPrenI();
 }
 
@@ -1302,6 +1309,13 @@ async function completaLavoro(prenId){
   const {data}=await db.from('prenotazioni').select('id').eq('installatore_id',user.id).eq('stato','completata');
   await db.from('profiles').update({lavori_completati:(data||[]).length}).eq('id',user.id);
   toast('✔️ Lavoro completato','success');
+  const {data:pren}=await db.from('prenotazioni').select('*,cliente:cliente_id(nome,cognome)').eq('id',prenId).single();
+  await sendEmail(ADMIN_EMAIL,'✔️ Lavoro completato su TAP',
+    emailTemplate('Lavoro completato',
+      `<p>L'installatore <strong>${cap(prof?.nome||'')} ${cap(prof?.cognome||'')}</strong> ha segnato un lavoro come completato.</p>
+      <p><strong>Cliente:</strong> ${cap(pren?.cliente?.nome||'')} ${cap(pren?.cliente?.cognome||'')}</p>
+      <p><strong>Categoria:</strong> ${pren?.categoria||''}</p>`,
+      null,null));
   loadPrenI();
 }
 
