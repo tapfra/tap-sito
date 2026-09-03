@@ -641,6 +641,7 @@ html,body{width:100%;height:100%;background:#000;font-family:'Nunito',sans-serif
         </div>
         <div id="b-foto-preview"></div>
       </div>
+      <div class="field"><label>Indirizzo (via e numero civico) *</label><input id="b-indirizzo" type="text" placeholder="Es. Via Roma 12"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="field"><label>Data</label><input id="b-data" type="date"></div>
         <div class="field"><label>Ora</label><input id="b-ora" type="time"></div>
@@ -1125,6 +1126,7 @@ function openBooking(instId,instName){
   bookInst={id:instId,name:instName};
   document.getElementById('booking-inst-name').textContent='Per: '+instName;
   document.getElementById('b-desc').value='';
+  document.getElementById('b-indirizzo').value='';
   document.getElementById('b-data').value='';
   document.getElementById('b-ora').value='';
   openOv('ov-booking');
@@ -1132,11 +1134,12 @@ function openBooking(instId,instName){
 
 async function submitBooking(){
   const desc=document.getElementById('b-desc').value.trim();
+  const indirizzo=document.getElementById('b-indirizzo').value.trim();
   const data=document.getElementById('b-data').value;
   const ora=document.getElementById('b-ora').value;
-  if(!desc||!data||!ora) return toast('⚠️ Compila tutti i campi','error');
+  if(!desc||!indirizzo||!data||!ora) return toast('⚠️ Compila tutti i campi, incluso l\'indirizzo','error');
   const fotoUrl=document.getElementById('b-foto-preview')?.dataset?.url||null;
-  const {error}=await db.from('prenotazioni').insert({cliente_id:user.id,installatore_id:bookInst.id,categoria:curCatSpec,descrizione:desc,data_lavoro:data,ora_lavoro:ora,stato:'in_attesa',foto_url:fotoUrl});
+  const {error}=await db.from('prenotazioni').insert({cliente_id:user.id,installatore_id:bookInst.id,categoria:curCatSpec,descrizione:desc,indirizzo,data_lavoro:data,ora_lavoro:ora,stato:'in_attesa',foto_url:fotoUrl});
   if(error) return toast('❌ '+error.message,'error');
   // Email all'installatore
   const {data:instProf}=await db.from('profiles').select('email,nome,cognome').eq('id',bookInst.id).single();
@@ -1146,6 +1149,7 @@ async function submitBooking(){
       emailTemplate('Hai una nuova richiesta!',
         `<p>Il cliente <strong>${cap(clProf?.nome||'')} ${cap(clProf?.cognome||'')}</strong> di <strong>${clProf?.zona||''}</strong> ha richiesto il tuo intervento.</p>
         <p><strong>Categoria:</strong> ${curCatSpec}</p>
+        <p><strong>Indirizzo:</strong> ${indirizzo}</p>
         <p><strong>Data:</strong> ${data} alle ${ora}</p>
         <p><strong>Descrizione:</strong> ${desc}</p>
         <p>Accedi all'app per accettare o rifiutare la richiesta.</p>`,
@@ -1159,6 +1163,7 @@ async function submitBooking(){
       <p><strong>Cliente:</strong> ${cap(clProf?.nome||'')} ${cap(clProf?.cognome||'')}</p>
       <p><strong>Installatore:</strong> ${cap(instProf?.nome||'')} ${cap(instProf?.cognome||'')}</p>
       <p><strong>Categoria:</strong> ${curCatSpec}</p>
+      <p><strong>Indirizzo:</strong> ${indirizzo}</p>
       <p><strong>Data:</strong> ${data} alle ${ora}</p>`,
       null,null));
   closeOvDirect('ov-booking');
@@ -1247,7 +1252,7 @@ async function loadPrenI(){
       :'';
     return`<div class="pren-card">
       <div class="pren-header"><div class="pren-name">${cap(cl?.nome||'?')} ${cap(cl?.cognome||'?')}</div><span class="badge ${bc}">${sl}</span></div>
-      <div class="pren-info">📂 ${p.categoria} · 📍 ${cl?.zona||'—'}</div>
+      <div class="pren-info">📂 ${p.categoria} · 📍 ${p.indirizzo||cl?.zona||'—'}</div>
       <div class="pren-date">📅 ${p.data_lavoro} alle ${(p.ora_lavoro||'').slice(0,5)}</div>
       <div class="pren-desc">${p.descrizione}</div>
       ${p.foto_url?`<img src="${p.foto_url}" style="width:100%;border-radius:12px;margin-bottom:8px;max-height:200px;object-fit:cover">`:''}
