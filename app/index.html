@@ -1467,6 +1467,11 @@ async function regCliente(){
   if(error) return toast('❌ '+error.message,'error');
   await db.from('profiles').upsert({id:data.user.id,nome,cognome,eta:parseInt(eta)||null,sesso,zona,telefono:tel,ruolo:'cliente',email,lavori_completati:0});
   user=data.user; prof={nome,cognome,zona,telefono:tel,sesso,ruolo:'cliente',email};
+  await sendEmail(email,'👋 Benvenuto su TAP',
+    emailTemplate('Benvenuto su TAP!',
+      `<p>Ciao ${cap(nome)},</p>
+      <p>Il tuo account TAP è pronto. Ora puoi cercare tecnici certificati vicino a te e richiedere un intervento in pochi tap.</p>`,
+      'Vai su TAP','https://taptech.it/app'));
   toast('✅ Benvenuto su TAP','success');
   setTimeout(()=>showClienteDash(),800);
 }
