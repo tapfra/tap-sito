@@ -1073,6 +1073,8 @@ async function checkAdmin(){
       btn.onclick = () => { go('s-admin'); loadAdmin('in_attesa'); };
       logoutBtn.parentElement.insertBefore(btn, logoutBtn);
     }
+  } else {
+    document.getElementById('admin-btn')?.remove();
   }
 }
 
@@ -1540,6 +1542,7 @@ async function doLogin(){
 async function doLogout(){
   if(chatInterval) clearInterval(chatInterval);
   await db.auth.signOut(); user=null; prof=null;
+  document.getElementById('admin-btn')?.remove();
   toast('Arrivederci');
   setTimeout(()=>go('s-home'),500);
 }
