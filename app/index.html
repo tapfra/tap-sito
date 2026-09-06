@@ -1306,6 +1306,15 @@ async function sonoInArrivo(prenId, nomeCliente){
   });
   // Aggiorna stato prenotazione
   await db.from('prenotazioni').update({installatore_in_arrivo: true}).eq('id', prenId);
+  const {data:pren}=await db.from('prenotazioni').select('*,cliente:cliente_id(email,nome)').eq('id',prenId).single();
+  if(pren?.cliente?.email){
+    await sendEmail(pren.cliente.email,'🚗 Il tuo tecnico sta arrivando!',
+      emailTemplate('In arrivo!',
+        `<p>Ciao <strong>${cap(pren.cliente.nome||'')}</strong>,</p>
+        <p>Il tuo installatore è in arrivo per l'intervento richiesto.</p>
+        <p>Apri l'app per seguire la chat con il tecnico.</p>`,
+        'Apri TAP','https://taptech.it/app'));
+  }
   toast('✅ Cliente notificato — sa che stai arrivando!', 'success');
   loadPrenI();
 }
@@ -1316,7 +1325,15 @@ async function completaLavoro(prenId){
   const {data}=await db.from('prenotazioni').select('id').eq('installatore_id',user.id).eq('stato','completata');
   await db.from('profiles').update({lavori_completati:(data||[]).length}).eq('id',user.id);
   toast('✔️ Lavoro completato','success');
-  const {data:pren}=await db.from('prenotazioni').select('*,cliente:cliente_id(nome,cognome)').eq('id',prenId).single();
+  const {data:pren}=await db.from('prenotazioni').select('*,cliente:cliente_id(email,nome,cognome)').eq('id',prenId).single();
+  if(pren?.cliente?.email){
+    await sendEmail(pren.cliente.email,'✔️ Intervento completato',
+      emailTemplate('Lavoro completato!',
+        `<p>Ciao <strong>${cap(pren.cliente.nome||'')}</strong>,</p>
+        <p>Il tuo installatore ha segnato l'intervento come completato.</p>
+        <p>Lascia una recensione per aiutare altri utenti a trovare il tecnico giusto!</p>`,
+        'Lascia una recensione','https://taptech.it/app'));
+  }
   await sendEmail(ADMIN_EMAIL,'✔️ Lavoro completato su TAP',
     emailTemplate('Lavoro completato',
       `<p>L'installatore <strong>${cap(prof?.nome||'')} ${cap(prof?.cognome||'')}</strong> ha segnato un lavoro come completato.</p>
